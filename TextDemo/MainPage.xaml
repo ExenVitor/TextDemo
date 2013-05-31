@@ -14,8 +14,7 @@
         </Grid.ColumnDefinitions>
         <Grid x:Name="displayGrid" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="DarkGray">
             <Image x:Name="imageView" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <Image x:Name="maskView" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <Canvas x:Name="textCanvas" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <local:TextCanvasControl x:Name="textCanvasControl"/>
         </Grid>
         
     </Grid>

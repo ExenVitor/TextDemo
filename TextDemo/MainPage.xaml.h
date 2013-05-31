@@ -23,7 +23,7 @@ namespace TextDemo
 		Concurrency::task<void> loadImage();
 		double getFitScale();
 
-		Windows::UI::Xaml::Media::Imaging::WriteableBitmap^ m_currentImg;
+		Windows::UI::Xaml::Media::Imaging::WriteableBitmap^ m_previewImg;
 		double m_imgNowW;
 		double m_imgNowH;
 		double m_scale;

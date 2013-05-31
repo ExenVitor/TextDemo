@@ -5,6 +5,7 @@
 
 #include "pch.h"
 #include "MainPage.xaml.h"
+#include "TextCanvasControl.xaml.h"
 
 using namespace TextDemo;
 
@@ -49,36 +50,26 @@ void MainPage::OnNavigatedTo(NavigationEventArgs^ e)
 task<void> MainPage::loadImage()
 {
 	String ^path = "Assets\\sample.jpg";
-	m_currentImg = nullptr;
-	m_currentImg = ref new WriteableBitmap(10,10);
+	m_previewImg = nullptr;
+	m_previewImg = ref new WriteableBitmap(10,10);
 	auto packageFolder = Windows::ApplicationModel::Package::Current->InstalledLocation;
 	return create_task(packageFolder->GetFileAsync(path)).then([this](StorageFile^ file){
 		return file->OpenAsync(FileAccessMode::Read);
 	}).then([this](IRandomAccessStream^ stream){
-		m_currentImg->SetSource(stream);
+		m_previewImg->SetSource(stream);
 		auto callback = ref new Windows::UI::Core:: DispatchedHandler([this]()
 		{
 			m_scale = getFitScale();
-			double imgPixW = m_currentImg->PixelWidth;
-			double imgPixH = m_currentImg->PixelHeight;
+			double imgPixW = m_previewImg->PixelWidth;
+			double imgPixH = m_previewImg->PixelHeight;
 			m_imgNowW = imgPixW * m_scale;
 			m_imgNowH = imgPixH * m_scale;
 
 			imageView->Width = m_imgNowW;
 			imageView->Height = m_imgNowH;
 
-			maskView->Width = m_imgNowW;
-			maskView->Height = m_imgNowH;
-
-			textCanvas->Width = m_imgNowW;
-			textCanvas->Height = m_imgNowH;
-
-			textCanvas->Children->Clear();
-			auto clipRect = ref new RectangleGeometry();
-			clipRect->Rect = Rect(0,0,m_imgNowW,m_imgNowH);
-			textCanvas->Clip = clipRect;
-
-			imageView->Source = m_currentImg;
+			textCanvasControl->initTextCanvas(m_imgNowW,m_imgNowH,m_scale,m_previewImg);
+			imageView->Source = m_previewImg;
 
 		});
 		return Dispatcher->RunAsync(Windows::UI::Core:: CoreDispatcherPriority ::Normal, callback);
@@ -90,8 +81,8 @@ double MainPage::getFitScale()
 {
 	double fitScale = 1.0;
 	
-	double w = m_currentImg->PixelWidth;
-	double h = m_currentImg->PixelHeight;
+	double w = m_previewImg->PixelWidth;
+	double h = m_previewImg->PixelHeight;
 
 	double canvasWidth = displayGrid->ActualWidth - drawSpace;
 	double canvasHeight = displayGrid->ActualHeight - drawSpace;
