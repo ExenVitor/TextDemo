@@ -140,7 +140,9 @@
     <ClInclude Include="TextCanvasControl.xaml.h">
       <DependentUpon>TextCanvasControl.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="TextFunctionDrawOut.h" />
     <ClInclude Include="TextMask.h" />
+    <ClInclude Include="VignetteMask.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -187,7 +189,9 @@
     <ClCompile Include="TextCanvasControl.xaml.cpp">
       <DependentUpon>TextCanvasControl.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="TextFunctionDrawOut.cpp" />
     <ClCompile Include="TextMask.cpp" />
+    <ClCompile Include="VignetteMask.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
