@@ -5,6 +5,7 @@
 
 #include "pch.h"
 #include "MainPage.xaml.h"
+#include "TextControl.xaml.h"
 #include "TextCanvasControl.xaml.h"
 
 using namespace TextDemo;
@@ -42,10 +43,19 @@ MainPage::MainPage()
 void MainPage::OnNavigatedTo(NavigationEventArgs^ e)
 {
 	(void) e;	// 未使用的参数
-
+	initControls();
 	loadImage();
 }
 
+
+void MainPage::initControls()
+{
+	m_pTextControl = ref new TextControl(this);
+	m_pTextCanvasControl = ref new TextCanvasControl(this);
+
+	controlGrid->Children->Append(m_pTextControl);
+	displayGrid->Children->Append(m_pTextCanvasControl);
+}
 
 task<void> MainPage::loadImage()
 {
@@ -68,7 +78,7 @@ task<void> MainPage::loadImage()
 			imageView->Width = m_imgNowW;
 			imageView->Height = m_imgNowH;
 
-			textCanvasControl->initTextCanvas(m_imgNowW,m_imgNowH,m_scale,m_previewImg);
+			m_pTextCanvasControl->initTextCanvas(m_imgNowW,m_imgNowH,m_scale,m_previewImg);
 			imageView->Source = m_previewImg;
 
 		});

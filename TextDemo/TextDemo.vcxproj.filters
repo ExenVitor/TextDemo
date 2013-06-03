@@ -22,6 +22,12 @@
     <Image Include="Assets\SplashScreen.png">
       <Filter>资产</Filter>
     </Image>
+    <Filter Include="images">
+      <UniqueIdentifier>{5b6ff885-eae4-43a8-8b29-df4c4345575d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="images\text">
+      <UniqueIdentifier>{7df12c6a-e35f-4d30-bf86-628d46fc8a4a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -50,10 +56,18 @@
   <ItemGroup>
     <Page Include="MainPage.xaml" />
     <Page Include="TextCanvasControl.xaml" />
+    <Page Include="TextLayoutItem.xaml" />
+    <Page Include="TextControl.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\sample.jpg">
       <Filter>资产</Filter>
+    </Image>
+    <Image Include="images\text\delete.png">
+      <Filter>images\text</Filter>
+    </Image>
+    <Image Include="images\text\rotate.png">
+      <Filter>images\text</Filter>
     </Image>
   </ItemGroup>
 </Project>

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "pch.h"
+#include "TextLayoutItem.xaml.h"
 
 namespace TextDemo{
 
+	ref class TextAttribute;
 	public ref class TextMask sealed : Windows::UI::Xaml::Media::Imaging::SurfaceImageSource
 	{
 	public:
@@ -15,11 +17,15 @@ namespace TextDemo{
 		void BeginDraw()    { BeginDraw(Windows::Foundation::Rect(0, 0, (float)m_width, (float)m_height)); }
 		void EndDraw();
 
-		void RenderText();
+		void Render();
+
+		property Platform::Array<TextAttribute ^> ^ 	pTextAttributes;
 	private protected:
 		void CreateDeviceIndependentResources();
 		void CreateDeviceResources();
 		void Clear(Windows::UI::Color color);
+
+		void RenderText(TextAttribute^ attri);
 
 		Microsoft::WRL::ComPtr<ISurfaceImageSourceNative>   m_sisNative;
 

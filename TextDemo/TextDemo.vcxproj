@@ -143,6 +143,12 @@
     <ClInclude Include="TextCanvasControl.xaml.h">
       <DependentUpon>TextCanvasControl.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="TextControl.xaml.h">
+      <DependentUpon>TextControl.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="TextLayoutItem.xaml.h">
+      <DependentUpon>TextLayoutItem.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="TextMask.h" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +164,12 @@
     <Page Include="TextCanvasControl.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="TextControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TextLayoutItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -171,6 +183,8 @@
     <Image Include="Assets\SmallLogo.png" />
     <Image Include="Assets\StoreLogo.png" />
     <Image Include="Assets\SplashScreen.png" />
+    <Image Include="images\text\delete.png" />
+    <Image Include="images\text\rotate.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp">
@@ -189,6 +203,12 @@
     </ClCompile>
     <ClCompile Include="TextCanvasControl.xaml.cpp">
       <DependentUpon>TextCanvasControl.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="TextControl.xaml.cpp">
+      <DependentUpon>TextControl.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="TextLayoutItem.xaml.cpp">
+      <DependentUpon>TextLayoutItem.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="TextMask.cpp" />
   </ItemGroup>

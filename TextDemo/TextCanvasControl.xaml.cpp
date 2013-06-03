@@ -5,7 +5,9 @@
 
 #include "pch.h"
 #include "TextCanvasControl.xaml.h"
+#include "TextLayoutItem.xaml.h"
 #include "TextMask.h"
+#include "MainPage.xaml.h"
 
 using namespace TextDemo;
 
@@ -24,9 +26,12 @@ using namespace concurrency;
 
 // “用户控件”项模板在 http://go.microsoft.com/fwlink/?LinkId=234236 上提供
 
-TextCanvasControl::TextCanvasControl()
+extern void bringToFront(Windows::UI::Xaml::Controls::Canvas^ parent,Windows::UI::Xaml::UIElement^ child);
+
+TextCanvasControl::TextCanvasControl(MainPage^ page)
 {
 	InitializeComponent();
+	m_pAdjustPage = page;
 }
 
 void TextCanvasControl::initTextCanvas(double width,double height,double scale,Windows::UI::Xaml::Media::Imaging::WriteableBitmap^ previewImg)
@@ -47,10 +52,58 @@ void TextCanvasControl::initTextCanvas(double width,double height,double scale,W
 
 	m_textMask = nullptr;
 	m_textMask = ref new TextMask(width,height,false);
-	m_textMask->BeginDraw();
-	m_textMask->RenderText();
-	m_textMask->EndDraw();
+	updateTextMask();
 	maskView->Source = m_textMask;
 
 	UpdateLayout();
+}
+
+void TextCanvasControl::updateTextMask()
+{
+	m_textMask->pTextAttributes = getItemAttributes();
+	m_textMask->BeginDraw();
+	m_textMask->Render();
+	m_textMask->EndDraw();
+}
+
+void TextCanvasControl::addTextLayoutItem(TextLayoutItem^ item)
+{
+	textCanvas->Children->Append(item);
+	//moveChildren(item,(textCanvas->ActualWidth-item->ActualWidth)/2,(textCanvas->ActualHeight-item->ActualHeight)/2);
+	bringToFront(textCanvas,item);
+	updateTextMask();
+}
+
+void TextCanvasControl::moveChildren(TextLayoutItem^ item,double disX,double disY)
+{
+	textCanvas->SetLeft(item,textCanvas->GetLeft(item)+disX);
+	textCanvas->SetTop(item,textCanvas->GetTop(item)+disY);
+}
+
+Platform::Array<TextAttribute^>^ TextCanvasControl::getItemAttributes()
+{
+	auto result=ref new Platform::Array<TextAttribute^>(textCanvas->Children->Size);
+	for(int i=0;i<textCanvas->Children->Size;i++){
+		result[i]=((TextLayoutItem^)textCanvas->Children->GetAt(i))->getTextAttribute();
+		result[i]->Zindex=textCanvas->GetZIndex(textCanvas->Children->GetAt(i));
+	}
+	//按zindex排序
+	int k;
+	int j;
+	TextAttribute^ tmp;
+	for(int i=0;i<result->Length;i++){
+		k=i;
+		for(j=i+1;j<result->Length;j++){
+			if(result[k]->Zindex>result[j]->Zindex){
+				k=j;
+			}
+		}
+		if(k!=i){
+			tmp=result[k];
+			result[k]=result[i];
+			result[i]=tmp;
+		}
+	}
+
+	return result;
 }

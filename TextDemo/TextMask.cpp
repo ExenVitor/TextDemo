@@ -201,7 +201,7 @@ void TextMask::EndDraw()
         );
 }
 
-void TextMask::RenderText()
+void TextMask::RenderText(TextAttribute^ attri)
 {
 	Microsoft::WRL::ComPtr<IDWriteTextFormat> m_textFormat;
 	Microsoft::WRL::ComPtr<IDWriteTextLayout> m_textLayout;
@@ -209,10 +209,10 @@ void TextMask::RenderText()
 	DWRITE_TEXT_METRICS m_textMetrics;
 	DX::ThrowIfFailed(
 		m_dwriteFactory->CreateTextFormat(
-		L"Gabriola",
+		attri->textFamily->Data(),
 		nullptr,
-		DWRITE_FONT_WEIGHT_NORMAL,
-		DWRITE_FONT_STYLE_NORMAL,
+		(int)(attri->style&TextDemo::FontStyle::STYLE_BOLD) ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
+		(int)(attri->style& TextDemo::FontStyle::STYLE_OBLIQUE) ? DWRITE_FONT_STYLE_OBLIQUE : DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
 		50,
 		L"en-US",
@@ -225,11 +225,11 @@ void TextMask::RenderText()
 
 	DX::ThrowIfFailed(
 		m_d2dContext->CreateSolidColorBrush(
-		D2D1::ColorF(255.0,255.0,255.0,100.0),
+		D2D1::ColorF(attri->color.R/255.0,attri->color.G/255.0,attri->color.B/255.0,attri->alpha/100.0),
 		&m_pBrush
 		)
 		);
-	Platform::String^ text = L"Hello World!";
+	Platform::String^ text = attri->textContent;
 	float width=5000;
 	float height=5000;
 	
@@ -251,7 +251,7 @@ void TextMask::RenderText()
 
 
 	DX::ThrowIfFailed(
-		m_textLayout->SetUnderline(false,
+		m_textLayout->SetUnderline((int)(attri->style&TextDemo::FontStyle::STYLE_UNDERLINE)?true:false,
 		textRange)
 		);
 
@@ -269,26 +269,26 @@ void TextMask::RenderText()
 		);
 
 	
-	float left=m_width/2.0 - m_textMetrics.widthIncludingTrailingWhitespace/2.0;
-	float top=m_height/2.0 - m_textMetrics.height/2.0;
+	float left=attri->left;
+	float top=attri->top;
 
 	float centerX;
 	float centerY;
 	
 
-	centerX=left+(m_textMetrics.widthIncludingTrailingWhitespace/2.0);
-	centerY=top+(m_textMetrics.height/2.0);
+	centerX=left+(attri->width/2.0);
+	centerY=top+(attri->height/2.0);
 
-	double angle = 0;
-	Matrix3x2F translation = Matrix3x2F::Rotation(angle,
+	
+	Matrix3x2F translation = Matrix3x2F::Rotation(attri->angle,
 		D2D1::Point2F(
 		centerX,centerY
 		)
 		);	
-	double scale = 1.0;
+	
 	translation.SetProduct(
 		translation,
-		Matrix3x2F::Scale(scale,scale,D2D1::Point2F(
+		Matrix3x2F::Scale(attri->scale,attri->scale,D2D1::Point2F(
 		centerX,centerY
 		))
 		);
@@ -300,4 +300,13 @@ void TextMask::RenderText()
 		m_pBrush.Get(),
 		D2D1_DRAW_TEXT_OPTIONS_NO_SNAP
 		);
+}
+
+void TextMask::Render()
+{
+	int attriSize = pTextAttributes->Length;
+	for(int i = 0;i<attriSize;i++)
+	{
+		RenderText(pTextAttributes[i]);
+	}
 }

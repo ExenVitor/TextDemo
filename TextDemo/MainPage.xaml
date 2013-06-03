@@ -12,9 +12,10 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="5*"/>            
         </Grid.ColumnDefinitions>
+        <Grid x:Name="controlGrid" Grid.Column="0" Margin="0,50,0,0"/>
         <Grid x:Name="displayGrid" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="DarkGray">
             <Image x:Name="imageView" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <local:TextCanvasControl x:Name="textCanvasControl"/>
+            
         </Grid>
         
     </Grid>
