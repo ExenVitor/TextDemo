@@ -5,6 +5,7 @@
 
 #include "pch.h"
 #include "TextCanvasControl.xaml.h"
+#include "TextMask.h"
 
 using namespace TextDemo;
 
@@ -43,5 +44,13 @@ void TextCanvasControl::initTextCanvas(double width,double height,double scale,W
 
 	m_scale = scale;
 	m_previewImg = previewImg;
+
+	m_textMask = nullptr;
+	m_textMask = ref new TextMask(width,height,false);
+	m_textMask->BeginDraw();
+	m_textMask->RenderText();
+	m_textMask->EndDraw();
+	maskView->Source = m_textMask;
+
 	UpdateLayout();
 }

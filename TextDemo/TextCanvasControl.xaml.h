@@ -11,6 +11,7 @@ using namespace Windows::UI::Xaml::Media::Imaging;
 
 namespace TextDemo
 {
+	ref class TextMask;
 	[Windows::Foundation::Metadata::WebHostHidden]
 	public ref class TextCanvasControl sealed
 	{
@@ -21,5 +22,6 @@ namespace TextDemo
 	private:
 		double				m_scale;
 		WriteableBitmap^	m_previewImg;
+		TextMask^			m_textMask;
 	};
 }

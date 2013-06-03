@@ -49,6 +49,14 @@ void TextMask::CreateDeviceIndependentResources()
 		&m_d2dFactory
 		)
 		);
+
+	DX::ThrowIfFailed(
+		DWriteCreateFactory(
+		DWRITE_FACTORY_TYPE_SHARED,
+		__uuidof(IDWriteFactory),
+		&m_dwriteFactory
+		)
+		);
 }
 
 // Initialize hardware-dependent resources.
@@ -172,5 +180,124 @@ void TextMask::BeginDraw(Windows::Foundation::Rect updateRect)
 
 	// Begin drawing using D2D context.
 	m_d2dContext->BeginDraw();
+
+	Clear(Windows::UI::Colors::Transparent);
 }
 
+
+
+void TextMask::EndDraw()
+{
+   
+    // Remove the render target and end drawing.
+    DX::ThrowIfFailed(
+        m_d2dContext->EndDraw()
+        );
+
+    m_d2dContext->SetTarget(nullptr);
+
+    DX::ThrowIfFailed(
+        m_sisNative->EndDraw()
+        );
+}
+
+void TextMask::RenderText()
+{
+	Microsoft::WRL::ComPtr<IDWriteTextFormat> m_textFormat;
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> m_textLayout;
+	Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> m_pBrush;
+	DWRITE_TEXT_METRICS m_textMetrics;
+	DX::ThrowIfFailed(
+		m_dwriteFactory->CreateTextFormat(
+		L"Gabriola",
+		nullptr,
+		DWRITE_FONT_WEIGHT_NORMAL,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		50,
+		L"en-US",
+		&m_textFormat
+		)
+		);
+	DX::ThrowIfFailed(
+		m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)
+		);
+
+	DX::ThrowIfFailed(
+		m_d2dContext->CreateSolidColorBrush(
+		D2D1::ColorF(255.0,255.0,255.0,100.0),
+		&m_pBrush
+		)
+		);
+	Platform::String^ text = L"Hello World!";
+	float width=5000;
+	float height=5000;
+	
+
+	DX::ThrowIfFailed(
+		m_dwriteFactory->CreateTextLayout(
+		text->Data(),
+		text->Length(),
+		m_textFormat.Get(),
+		width, // maxWidth¡£
+		height, // maxHeight¡£
+		&m_textLayout
+		)
+		);
+
+	DWRITE_TEXT_RANGE textRange;
+	textRange.length=text->Length();
+	textRange.startPosition=0;
+
+
+	DX::ThrowIfFailed(
+		m_textLayout->SetUnderline(false,
+		textRange)
+		);
+
+	////×ÖÌåÊÊÅä
+	//FontBaseLine^ baseline=getFontBaseLineFromName(attribute->textFamily);
+	//if(baseline!=nullptr){
+	//	DX::ThrowIfFailed(
+	//		m_textLayout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM,
+	//		baseline->lineSpace/orgScale*(attribute->size/40),
+	//		baseline->baseLine/orgScale*(attribute->size/40))
+	//		);
+	//}
+	DX::ThrowIfFailed(
+		m_textLayout->GetMetrics(&m_textMetrics)
+		);
+
+	
+	float left=m_width/2.0 - m_textMetrics.widthIncludingTrailingWhitespace/2.0;
+	float top=m_height/2.0 - m_textMetrics.height/2.0;
+
+	float centerX;
+	float centerY;
+	
+
+	centerX=left+(m_textMetrics.widthIncludingTrailingWhitespace/2.0);
+	centerY=top+(m_textMetrics.height/2.0);
+
+	double angle = 0;
+	Matrix3x2F translation = Matrix3x2F::Rotation(angle,
+		D2D1::Point2F(
+		centerX,centerY
+		)
+		);	
+	double scale = 1.0;
+	translation.SetProduct(
+		translation,
+		Matrix3x2F::Scale(scale,scale,D2D1::Point2F(
+		centerX,centerY
+		))
+		);
+
+	m_d2dContext->SetTransform(translation);
+	m_d2dContext->DrawTextLayout(
+		Point2F(left, top),
+		m_textLayout.Get(),
+		m_pBrush.Get(),
+		D2D1_DRAW_TEXT_OPTIONS_NO_SNAP
+		);
+}

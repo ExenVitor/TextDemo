@@ -32,8 +32,6 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="TextMask.cpp" />
     <ClCompile Include="TextCanvasControl.xaml.cpp" />
-    <ClCompile Include="TextFunctionDrawOut.cpp" />
-    <ClCompile Include="VignetteMask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -42,8 +40,6 @@
     <ClInclude Include="TextMask.h" />
     <ClInclude Include="DirectXHelper.h" />
     <ClInclude Include="TextCanvasControl.xaml.h" />
-    <ClInclude Include="TextFunctionDrawOut.h" />
-    <ClInclude Include="VignetteMask.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
