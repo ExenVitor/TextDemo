@@ -41,6 +41,13 @@ void bringToFront(Windows::UI::Xaml::Controls::Canvas^ parent,Windows::UI::Xaml:
 	
 }
 
+//获取两地的距离
+double getDistance(double x1,double y1,double x2,double y2){
+	double temp_w = x1-x2;
+	double temp_h = y1-y2;
+	return sqrt(temp_w*temp_w + temp_h*temp_h); // 计算
+}
+
 //获取指定文字的宽高
 void getCharacterSize(Platform::String^ str,
 					  Platform::String^ fontName,
@@ -131,6 +138,26 @@ TextAttribute^ TextLayoutItem::getTextAttribute()
 	return m_textAttribute;
 }
 
+float TextLayoutItem::getMatchingsize(float width,float height)
+{
+	double textSize[2]={0,0};
+	for (int i=72;i>0;i--){
+		getCharacterSize(m_textAttribute->textContent,
+					 m_textAttribute->textFamily,
+					 i,
+					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_BOLD)?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL,
+					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_OBLIQUE)?DWRITE_FONT_STYLE_OBLIQUE:DWRITE_FONT_STYLE_NORMAL,
+					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_UNDERLINE)?true:false,
+					 DWRITE_FONT_STRETCH_NORMAL,
+					 width,height,
+					 textSize);
+		if(textSize[0]<width && textSize[1]<height){
+			return i;
+		}
+	}
+	return 1;
+}
+
 
 void TextLayoutItem::notifyChanged()
 {
@@ -156,11 +183,31 @@ void TextLayoutItem::notifyChanged()
 	m_pTextCanvasControl->updateTextMask();
 }
 
+void TextLayoutItem::scaleSelf(double scaleValue,double center_x,double center_y)
+{
+	double orgWidth = selectGrid->Width;
+	double orgHeight = selectGrid->Height;
+	selectGrid->Width = m_textAttribute->width * scaleValue;
+	selectGrid->Height = m_textAttribute->height * scaleValue;
+	double disX = (orgWidth - selectGrid->Width) / 2.0;
+	double disY = (orgHeight - selectGrid->Height) / 2.0;
+
+	auto parent = safe_cast<Canvas^>(this->Parent);
+	double halfW = selectGrid->Width / 2.0;
+	double halfH = selectGrid->Height / 2.0;
+	double newX = parent->GetLeft(this) + disX;
+	double newY = parent->GetTop(this) + disY;
+	
+	parent->SetLeft(this,parent->GetLeft(this)+disX);
+	parent->SetTop(this,parent->GetTop(this)+disY);
+	
+}
+
 void TextLayoutItem::moveSelf(double disX,double disY)
 {
 	auto parent = safe_cast<Canvas^>(this->Parent);
-	double halfW = selectGrid->ActualWidth / 2.0;
-	double halfH = selectGrid->ActualHeight / 2.0;
+	double halfW = selectGrid->Width / 2.0;
+	double halfH = selectGrid->Height / 2.0;
 	double newX = parent->GetLeft(this) + disX;
 	double newY = parent->GetTop(this) + disY;	
 
@@ -168,8 +215,8 @@ void TextLayoutItem::moveSelf(double disX,double disY)
 		m_isChanged = true;
 	parent->SetLeft(this,parent->GetLeft(this)+disX);
 	parent->SetTop(this,parent->GetTop(this)+disY);
-	m_textAttribute->left=parent->GetLeft(this);
-	m_textAttribute->top=parent->GetTop(this);
+	m_textAttribute->left += disX;
+	m_textAttribute->top += disY;
 }
 
 void TextDemo::TextLayoutItem::UserControl_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
@@ -182,15 +229,16 @@ void TextDemo::TextLayoutItem::UserControl_Loaded(Platform::Object^ sender, Wind
 
 void TextDemo::TextLayoutItem::SelectGridPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
-	bringToFront((Windows::UI::Xaml::Controls::Canvas^)this->Parent,this);
+	Canvas^ canvas=safe_cast<Canvas^>(this->Parent);
+	bringToFront(canvas,this);
 	if(sender->GetType()->ToString()->Equals(selectGrid->GetType()->ToString())){
 		m_itemAction=MOVE;
-		eventDwon_y = e->GetCurrentPoint(selectGrid)->Position.Y;
-		eventDwon_x = e->GetCurrentPoint(selectGrid)->Position.X;
+		eventDwon_y = e->GetCurrentPoint(canvas)->Position.Y;
+		eventDwon_x = e->GetCurrentPoint(canvas)->Position.X;
 	}else if(sender->GetType()->ToString()->Equals(img_rotate->GetType()->ToString())){
 		m_itemAction=SCALE;
-		eventDwon_y = e->GetCurrentPoint(selectGrid)->Position.Y;
-		eventDwon_x=e->GetCurrentPoint(selectGrid)->Position.X;
+		eventDwon_y = e->GetCurrentPoint(canvas)->Position.Y;
+		eventDwon_x=e->GetCurrentPoint(canvas)->Position.X;
 		new_x = eventDwon_x;
 		new_y = eventDwon_y;			
 	}
@@ -220,14 +268,64 @@ void TextDemo::TextLayoutItem::SelectGridReleased(Platform::Object^ sender, Wind
 
 void TextDemo::TextLayoutItem::SelectGridMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
+	Canvas^ canvas=safe_cast<Canvas^>(this->Parent);
 	if(m_itemAction==MOVE && e->Pointer->PointerDeviceType != PointerDeviceType::Touch){
 		e->Handled=true;
 		double disX,disY;
-		disX=e->GetCurrentPoint(selectGrid)->Position.X-eventDwon_x;
-		disY=e->GetCurrentPoint(selectGrid)->Position.Y-eventDwon_y;	
+		disX=e->GetCurrentPoint(canvas)->Position.X-eventDwon_x;
+		disY=e->GetCurrentPoint(canvas)->Position.Y-eventDwon_y;	
 		moveSelf(disX,disY);	
 		m_pTextCanvasControl->updateTextMask();
-		eventDwon_y = e->GetCurrentPoint(selectGrid)->Position.Y;
-		eventDwon_x = e->GetCurrentPoint(selectGrid)->Position.X;	
+		eventDwon_y = e->GetCurrentPoint(canvas)->Position.Y;
+		eventDwon_x = e->GetCurrentPoint(canvas)->Position.X;	
+	}else if(m_itemAction==SCALE){
+		double x =e->GetCurrentPoint(canvas)->Position.X;
+		double y =e->GetCurrentPoint(canvas)->Position.Y;
+		double centerX=0;
+		double centerY=0;
+		centerX=canvas->GetLeft(this) + selectGrid->Width / 2.0;
+		centerY=canvas->GetTop(this) + selectGrid->Height / 2.0;
+		//起始触摸点和图片中心点的距离
+		oldDistance = getDistance(centerX,centerY,eventDwon_x,eventDwon_y);      
+		//当前触摸点和图片中心点的距离
+		double newDistance = getDistance(centerX,centerY,x,y);
+		//得到缩放比例
+		double scaleValue = newDistance/oldDistance;
+
+		double newScale=oldScale*scaleValue;
+
+		
+		double maxTxtScaleX = canvas->ActualWidth / (m_textAttribute->width + img_delete->Width);
+		double maxTxtScaleY = canvas->ActualHeight / (m_textAttribute->height + img_delete->Height);
+		double maxTxtScale = maxTxtScaleX < maxTxtScaleY ? maxTxtScaleX : maxTxtScaleY;
+		if(newScale > maxTxtScale)
+			newScale = maxTxtScale;
+
+		double newFontSize=getMatchingsize(m_textAttribute->width*newScale,m_textAttribute->height*newScale);
+
+		if(newFontSize>8.0 ){
+			if(m_textAttribute->scale != newScale)
+				m_isChanged = true;
+			//记录到属性
+			m_textAttribute->scale=newScale;
+			//缩放文本框		
+			scaleSelf(m_textAttribute->scale,centerX,centerY);
+		}
+
+		
+		////计算旋转角度,并记录到属性
+		//double angle =  getAngle(centerX,centerY,eventDwon_x,eventDwon_y,x,y) ;
+		//if(angle != 0)
+		//	m_isChanged = true;
+		//m_pAttribute->angle+= angle ;
+		//m_pAttribute->angle=(int)m_pAttribute->angle%360;
+		//if(m_pAttribute->angle<0) m_pAttribute->angle+=360;
+		//rotate(m_pAttribute->angle,centerX,centerY);
+
+		////刷新界面控件数据
+		//m_pFunctionControl->eventLock=true;
+		//m_pFunctionControl->setCurrentItem(this);
+		//m_pFunctionControl->eventLock=false;
+		m_pTextCanvasControl->updateTextMask();
 	}
 }

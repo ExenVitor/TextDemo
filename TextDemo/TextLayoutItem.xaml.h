@@ -85,6 +85,10 @@ namespace TextDemo
 		void notifyChanged();
 		//移动自己在父控件中的位置
 		void moveSelf(double disX,double disY);
+		//缩放文本
+		void scaleSelf(double scaleValue,double center_x,double center_y);
+		//根据宽高计算合适的字号
+		float getMatchingsize(float width,float height);
 
 		void UserControl_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
