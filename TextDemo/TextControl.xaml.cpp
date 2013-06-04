@@ -33,9 +33,9 @@ TextControl::TextControl(MainPage^ page)
 TextAttribute^ TextControl::createTextAttribute()
 {
 	auto attri = ref new TextAttribute();
-	attri->textContent = L"Hello World!";
+	attri->textContent = L"Please input text";
 	attri->size = 56;
-	attri->textFamily=L"Gabriola";
+	attri->textFamily=L"Georgia";
 	attri->style = TextDemo::FontStyle::STYLE_NORMAL;
 
 	attri->color = Windows::UI::Colors::White;

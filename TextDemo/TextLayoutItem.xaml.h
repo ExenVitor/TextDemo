@@ -19,6 +19,7 @@ namespace TextDemo
 		};
 
 	ref class TextControl;
+	ref class TextCanvasControl;
 	[Windows::Foundation::Metadata::WebHostHidden]
 	public ref class TextAttribute sealed{
 	public:
@@ -67,20 +68,44 @@ namespace TextDemo
 		property int												Zindex;
 	};
 
+	enum ItemAction{
+		NONE,MOVE,SCALE
+	};
+
 	[Windows::Foundation::Metadata::WebHostHidden]
 	public ref class TextLayoutItem sealed
 	{
 	public:
 		TextLayoutItem(TextControl^ textControl);
 
-		TextAttribute ^				getTextAttribute();
+		void setCanvasControl(TextCanvasControl^ pControl) {m_pTextCanvasControl = pControl;}
+		TextAttribute ^				getTextAttribute();		
 
 	private:
 		void notifyChanged();
-		
+		//移动自己在父控件中的位置
+		void moveSelf(double disX,double disY);
 
+		void UserControl_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+
+		bool					m_isPressed;
+		bool					m_isChanged;
 		TextAttribute^			m_textAttribute;
 		TextControl^			m_pTextControl;
-		void UserControl_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		TextCanvasControl^		m_pTextCanvasControl;
+
+
+		//User Action
+		ItemAction				m_itemAction;
+		double					eventDwon_x;
+		double					eventDwon_y;
+		double					new_x; //触摸模式下记录缩放后触摸点位置
+		double					new_y;
+		double					oldScale;
+		double					oldDistance;
+		
+		void SelectGridPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
+		void SelectGridReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
+		void SelectGridMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 	};
 }

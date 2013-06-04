@@ -214,13 +214,13 @@ void TextMask::RenderText(TextAttribute^ attri)
 		(int)(attri->style&TextDemo::FontStyle::STYLE_BOLD) ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
 		(int)(attri->style& TextDemo::FontStyle::STYLE_OBLIQUE) ? DWRITE_FONT_STYLE_OBLIQUE : DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		50,
+		attri->size,
 		L"en-US",
 		&m_textFormat
 		)
 		);
 	DX::ThrowIfFailed(
-		m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)
+		m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER)
 		);
 
 	DX::ThrowIfFailed(
@@ -230,8 +230,8 @@ void TextMask::RenderText(TextAttribute^ attri)
 		)
 		);
 	Platform::String^ text = attri->textContent;
-	float width=5000;
-	float height=5000;
+	float width=attri->width;
+	float height=attri->height;
 	
 
 	DX::ThrowIfFailed(

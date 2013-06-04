@@ -22,13 +22,13 @@ namespace TextDemo
 	public:
 		TextCanvasControl(MainPage^ page);
 		void initTextCanvas(double width,double height,double scale,WriteableBitmap^ previewImg);
-		void addTextLayoutItem(TextLayoutItem^ item);
-		void moveChildren(TextLayoutItem^ item,double disX,double disY);
-
+		void addTextLayoutItem(TextLayoutItem^ item);		
+		
 		Platform::Array<TextAttribute^>^ getItemAttributes();
+		void updateTextMask();
 
 	private:
-		void updateTextMask();
+		
 
 		double				m_scale;
 		WriteableBitmap^	m_previewImg;

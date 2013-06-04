@@ -9,14 +9,14 @@
     d:DesignHeight="300"
     d:DesignWidth="400" Loaded="UserControl_Loaded">
     
-    <Grid Name="selectGrid">
+    <Grid Name="selectGrid" Background="Transparent" PointerPressed="SelectGridPressed" PointerReleased="SelectGridReleased" PointerMoved="SelectGridMoved"  >
         <Border Name="selectBorder" BorderBrush="#009bda" BorderThickness="2" />
         <Image Source="images/text/delete.png" Width="30" Height="30" x:Name="img_delete"  HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5">
             <Image.RenderTransform>
                 <CompositeTransform TranslateX="-15" TranslateY="-15"/>
             </Image.RenderTransform>
         </Image>
-        <Image Source="images/text/rotate.png" Width="30" Height="30" x:Name="img_rotate"  HorizontalAlignment="Right" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5">
+        <Image Source="images/text/rotate.png" Width="30" Height="30" x:Name="img_rotate"  HorizontalAlignment="Right" VerticalAlignment="Bottom" RenderTransformOrigin="0.5,0.5" PointerPressed="SelectGridPressed">
             <Image.RenderTransform>
                 <CompositeTransform TranslateX="15" TranslateY="15"/>
             </Image.RenderTransform>

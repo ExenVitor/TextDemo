@@ -68,17 +68,15 @@ void TextCanvasControl::updateTextMask()
 
 void TextCanvasControl::addTextLayoutItem(TextLayoutItem^ item)
 {
+	item->setCanvasControl(this);
 	textCanvas->Children->Append(item);
-	//moveChildren(item,(textCanvas->ActualWidth-item->ActualWidth)/2,(textCanvas->ActualHeight-item->ActualHeight)/2);
+	textCanvas->UpdateLayout();
+	item->UpdateLayout();
 	bringToFront(textCanvas,item);
-	updateTextMask();
+	
 }
 
-void TextCanvasControl::moveChildren(TextLayoutItem^ item,double disX,double disY)
-{
-	textCanvas->SetLeft(item,textCanvas->GetLeft(item)+disX);
-	textCanvas->SetTop(item,textCanvas->GetTop(item)+disY);
-}
+
 
 Platform::Array<TextAttribute^>^ TextCanvasControl::getItemAttributes()
 {
