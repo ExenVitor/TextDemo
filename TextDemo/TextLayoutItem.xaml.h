@@ -86,7 +86,9 @@ namespace TextDemo
 		//移动自己在父控件中的位置
 		void moveSelf(double disX,double disY);
 		//缩放文本
-		void scaleSelf(double scaleValue,double center_x,double center_y);
+		void scaleSelf(double scaleValue);
+		//旋转控件本身
+		void rotateSelf(double angle);
 		//根据宽高计算合适的字号
 		float getMatchingsize(float width,float height);
 
@@ -107,6 +109,7 @@ namespace TextDemo
 		double					new_y;
 		double					oldScale;
 		double					oldDistance;
+		double					oldAngle;
 		
 		void SelectGridPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 		void SelectGridReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);

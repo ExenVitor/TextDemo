@@ -44,7 +44,7 @@ void MainPage::OnNavigatedTo(NavigationEventArgs^ e)
 {
 	(void) e;	// 未使用的参数
 	initControls();
-	loadImage();
+	
 }
 
 
@@ -102,4 +102,9 @@ double MainPage::getFitScale()
 	if(fitScale > 1.0)
 		fitScale = 1.0;
 	return fitScale;
+}
+
+void TextDemo::MainPage::Page_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	loadImage();
 }

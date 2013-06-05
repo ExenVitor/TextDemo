@@ -37,6 +37,7 @@ namespace TextDemo
 		double m_scale;
 
 		
+		void Page_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 }

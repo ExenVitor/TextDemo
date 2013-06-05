@@ -48,6 +48,28 @@ double getDistance(double x1,double y1,double x2,double y2){
 	return sqrt(temp_w*temp_w + temp_h*temp_h); // 计算
 }
 
+//获取两点的夹角
+double getAngle(double centerX,double centerY,double x1,double y1,double x2,double y2){
+	x1 -= centerX;
+	y1 -= centerY;
+	double length1 = x1 * x1 + y1 * y1;
+	x2 -= centerX;
+	y2 -= centerY;
+	double length2 = x2 * x2 + y2 * y2;
+	double alpha = (double) ((x1 * x2 + y1 * y2) / (sqrt(length1) * sqrt(length2)));
+	double ll = x1 * y2 - y1 * x2;
+	if (alpha > 0.999999 && alpha < 1.000001) {
+		return 0.0;
+	}
+	double result = (double)acos(alpha);
+	if (ll < 0) {
+		result = -result;
+	}
+	
+	return result * 180 / 3.1415926;
+
+}
+
 //获取指定文字的宽高
 void getCharacterSize(Platform::String^ str,
 					  Platform::String^ fontName,
@@ -128,6 +150,7 @@ TextLayoutItem::TextLayoutItem(TextControl^ textControl)
 	new_y = 0.0;
 	oldScale = 1.0;
 	oldDistance = 1.0;
+	oldAngle = 1.0;
 	m_isChanged = false;
 	m_isPressed = false;
 
@@ -183,7 +206,7 @@ void TextLayoutItem::notifyChanged()
 	m_pTextCanvasControl->updateTextMask();
 }
 
-void TextLayoutItem::scaleSelf(double scaleValue,double center_x,double center_y)
+void TextLayoutItem::scaleSelf(double scaleValue)
 {
 	double orgWidth = selectGrid->Width;
 	double orgHeight = selectGrid->Height;
@@ -201,6 +224,17 @@ void TextLayoutItem::scaleSelf(double scaleValue,double center_x,double center_y
 	parent->SetLeft(this,parent->GetLeft(this)+disX);
 	parent->SetTop(this,parent->GetTop(this)+disY);
 	
+}
+
+void TextLayoutItem::rotateSelf(double angle)
+{
+	double centerX = selectGrid->Width / 2.0;
+	double centerY = selectGrid->Height / 2.0;
+	RotateTransform^ rotateTrans = safe_cast<RotateTransform^>(selectGrid->RenderTransform);
+	rotateTrans->Angle = m_textAttribute->angle;
+	rotateTrans->CenterX=centerX;
+	rotateTrans->CenterY=centerY;
+	selectGrid->RenderTransform=rotateTrans;
 }
 
 void TextLayoutItem::moveSelf(double disX,double disY)
@@ -245,6 +279,7 @@ void TextDemo::TextLayoutItem::SelectGridPressed(Platform::Object^ sender, Windo
 	e->Handled=true;
 	selectGrid->CapturePointer(e->Pointer);
 	oldScale=m_textAttribute->scale;
+	oldAngle = 0;
 	m_isPressed = true;
 }
 
@@ -309,18 +344,19 @@ void TextDemo::TextLayoutItem::SelectGridMoved(Platform::Object^ sender, Windows
 			//记录到属性
 			m_textAttribute->scale=newScale;
 			//缩放文本框		
-			scaleSelf(m_textAttribute->scale,centerX,centerY);
+			scaleSelf(m_textAttribute->scale);
 		}
-
 		
-		////计算旋转角度,并记录到属性
-		//double angle =  getAngle(centerX,centerY,eventDwon_x,eventDwon_y,x,y) ;
-		//if(angle != 0)
-		//	m_isChanged = true;
-		//m_pAttribute->angle+= angle ;
-		//m_pAttribute->angle=(int)m_pAttribute->angle%360;
-		//if(m_pAttribute->angle<0) m_pAttribute->angle+=360;
-		//rotate(m_pAttribute->angle,centerX,centerY);
+		//计算旋转角度,并记录到属性
+		double angle =  getAngle(centerX,centerY,eventDwon_x,eventDwon_y,x,y) ;		
+		double angleOffset = angle - oldAngle;		
+		oldAngle = angle;
+		if(angleOffset != 0)
+			m_isChanged = true;
+		m_textAttribute->angle += angleOffset ;
+		if(m_textAttribute->angle >= 360) m_textAttribute->angle -= 360;		
+		if(m_textAttribute->angle<0) m_textAttribute->angle+=360;
+		rotateSelf(m_textAttribute->angle);
 
 		////刷新界面控件数据
 		//m_pFunctionControl->eventLock=true;
