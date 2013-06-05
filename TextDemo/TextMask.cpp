@@ -16,6 +16,7 @@ TextMask::TextMask(int pixelWidth, int pixelHeight, bool isOpaque):
 {
 	m_width = pixelWidth;
 	m_height = pixelHeight;
+	m_scale = 1.0;
 	CreateDeviceIndependentResources();
 	CreateDeviceResources();
 }
@@ -214,7 +215,7 @@ void TextMask::RenderText(TextAttribute^ attri)
 		(int)(attri->style&TextDemo::FontStyle::STYLE_BOLD) ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
 		(int)(attri->style& TextDemo::FontStyle::STYLE_OBLIQUE) ? DWRITE_FONT_STYLE_OBLIQUE : DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
-		attri->size,
+		attri->size / m_scale,
 		L"en-US",
 		&m_textFormat
 		)
@@ -230,8 +231,8 @@ void TextMask::RenderText(TextAttribute^ attri)
 		)
 		);
 	Platform::String^ text = attri->textContent;
-	float width=attri->width;
-	float height=attri->height;
+	float width=attri->width / m_scale;
+	float height=attri->height / m_scale;
 	
 
 	DX::ThrowIfFailed(
@@ -269,15 +270,15 @@ void TextMask::RenderText(TextAttribute^ attri)
 		);
 
 	
-	float left=attri->left;
-	float top=attri->top;
+	float left=attri->left / m_scale;
+	float top=attri->top / m_scale;
 
 	float centerX;
 	float centerY;
 	
 
-	centerX=left+(attri->width/2.0);
-	centerY=top+(attri->height/2.0);
+	centerX=left+(attri->width/2.0) / m_scale;
+	centerY=top+(attri->height/2.0) / m_scale;
 
 	
 	Matrix3x2F translation = Matrix3x2F::Rotation(attri->angle,
@@ -309,4 +310,97 @@ void TextMask::Render()
 	{
 		RenderText(pTextAttributes[i]);
 	}
+}
+
+Platform::Array<BYTE>^  TextMask::getSaveData(double width,double height,double scale)
+{
+	if(pTextAttributes->Length < 1)
+		return nullptr;
+	D2D1_SIZE_F	bitmapSize;
+	bitmapSize.width=width;
+	bitmapSize.height=height;
+	
+	UINT32 size=m_d2dContext->GetMaximumBitmapSize();
+
+	this->m_scale=scale;
+
+	if(width>size || height>size){
+		double offset=width>height?size/width:size/height;
+		bitmapSize.width*=offset;
+		bitmapSize.height*=offset;
+		
+		this->m_scale/=offset;	
+	}
+	
+	_bitmapWidth=bitmapSize.width;
+	_bitmapHeight=bitmapSize.height;
+
+	D2D1_BITMAP_PROPERTIES1 renderTargetProperties = D2D1::BitmapProperties1(
+		D2D1_BITMAP_OPTIONS_TARGET,
+		D2D1::PixelFormat(
+		DXGI_FORMAT_B8G8R8A8_UNORM,
+		D2D1_ALPHA_MODE_PREMULTIPLIED
+		)
+		);
+	DX::ThrowIfFailed(m_d2dContext->CreateBitmap(
+		D2D1::SizeU(static_cast<UINT32>(bitmapSize.width) ,static_cast<UINT32>(bitmapSize.height)),
+		nullptr,
+		0,
+		&renderTargetProperties,
+		&m_pTargetBitmap
+		));
+	m_d2dContext->SetTarget(m_pTargetBitmap.Get());
+	m_d2dContext->BeginDraw();	
+	Clear(Windows::UI::Colors::Transparent);
+	//==========================================================
+
+	Render();
+
+	//==========================================================
+	HRESULT hr = m_d2dContext->EndDraw();
+	DX::ThrowIfFailed(hr);
+	
+	if (hr != D2DERR_RECREATE_TARGET)
+	{		
+		D2D1_BITMAP_PROPERTIES1 prop = D2D1::BitmapProperties1(  
+			D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,  
+			D2D1::PixelFormat(  
+			DXGI_FORMAT_B8G8R8A8_UNORM,  
+			D2D1_ALPHA_MODE_PREMULTIPLIED  
+			)  
+			);  
+
+		DX::ThrowIfFailed(m_d2dContext->CreateBitmap(  
+			D2D1::SizeU(static_cast<UINT32>(bitmapSize.width) ,static_cast<UINT32>(bitmapSize.height)),  
+			nullptr,  
+			0,  
+			&prop,  
+			&m_pRenderBitmap  
+			)); 
+		D2D1_POINT_2U point;
+		point.x = 0;
+		point.y = 0;
+
+		D2D1_RECT_U rect = D2D1::RectU(0,0,static_cast<UINT32>(bitmapSize.width),static_cast<UINT32>(bitmapSize.height));
+		DX::ThrowIfFailed(m_pRenderBitmap->CopyFromBitmap(&point,m_pTargetBitmap.Get(),&rect));
+		D2D1_MAP_OPTIONS options = D2D1_MAP_OPTIONS_READ;
+		D2D1_MAPPED_RECT mappedRect;
+		DX::ThrowIfFailed(m_pRenderBitmap->Map(options, &mappedRect));
+		auto pData = ref new Platform::Array<byte>(_bitmapWidth * _bitmapHeight * 4);
+		byte *srcData = mappedRect.bits;
+		byte *dstData = pData->Data;
+		for(int i = 0; i < _bitmapHeight; i++)
+		{
+			memcpy(dstData,srcData,_bitmapWidth * 4);
+			srcData += mappedRect.pitch;
+			dstData += _bitmapWidth * 4;
+		}
+		m_pRenderBitmap->Unmap();
+		m_d2dContext->SetTarget(nullptr);
+		m_pTargetBitmap = nullptr;
+		m_pRenderBitmap = nullptr;		
+		return pData;
+	}
+	m_scale = 1.0;
+	return nullptr;
 }

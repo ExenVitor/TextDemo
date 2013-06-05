@@ -21,6 +21,7 @@ namespace TextDemo
 
 		TextControl^ getTextControl() {return m_pTextControl;}
 		TextCanvasControl^ getTextCanvasControl() {return m_pTextCanvasControl;}
+		Windows::UI::Xaml::Media::Imaging::WriteableBitmap^ getPreview() {return m_previewImg;}
 
 	protected:
 		virtual void OnNavigatedTo(Windows::UI::Xaml::Navigation::NavigationEventArgs^ e) override;

@@ -58,6 +58,21 @@ void TextCanvasControl::initTextCanvas(double width,double height,double scale,W
 	UpdateLayout();
 }
 
+Array<BYTE>^ TextCanvasControl::getResultData()
+{
+	return m_textMask->getSaveData(m_previewImg->PixelWidth,m_previewImg->PixelHeight,m_scale);
+}
+
+int TextCanvasControl::getResultWidth()
+{
+	return m_textMask->BitmapWidth;
+}
+
+int TextCanvasControl::getResultHeight()
+{
+	return m_textMask->BitmapHeight;
+}
+
 void TextCanvasControl::updateTextMask()
 {
 	m_textMask->pTextAttributes = getItemAttributes();

@@ -25,6 +25,9 @@ namespace TextDemo
 		void addTextLayoutItem(TextLayoutItem^ item);		
 		
 		Platform::Array<TextAttribute^>^ getItemAttributes();
+		Platform::Array<BYTE>^ getResultData();
+		int getResultWidth();
+		int getResultHeight();
 		void updateTextMask();
 
 	private:

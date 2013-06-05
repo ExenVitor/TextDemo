@@ -24,5 +24,6 @@ namespace TextDemo
 		void onAddClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		MainPage^			m_pAdjustPage;
 		TextLayoutItem^		m_currentTextItem;
+		void onSaveClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }
