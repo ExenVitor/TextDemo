@@ -12,7 +12,7 @@
                     用于定义平台外观的共同方面的样式
                     Visual Studio 项目和项模板所必需的
                  -->
-                <ResourceDictionary Source="Common/StandardStyles.xaml"/>
+                <ResourceDictionary Source="Common/StandardStyles.xaml"/>              
             </ResourceDictionary.MergedDictionaries>
 
         </ResourceDictionary>

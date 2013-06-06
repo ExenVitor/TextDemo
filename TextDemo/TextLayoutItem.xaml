@@ -15,7 +15,7 @@
         </Grid.RenderTransform>
         <Border Name="selectBorder" BorderBrush="#009bda" BorderThickness="2" />
         <Canvas HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Image Source="images/text/delete.png" Width="30" Height="30" x:Name="img_delete"  HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5">
+            <Image Source="images/text/delete.png" Width="30" Height="30" x:Name="img_delete"  HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" PointerPressed="DeletePressed" Tapped="DeleteTapped">
                 <Image.RenderTransform>
                     <CompositeTransform TranslateX="-15" TranslateY="-15"/>
                 </Image.RenderTransform>

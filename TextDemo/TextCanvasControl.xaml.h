@@ -22,7 +22,8 @@ namespace TextDemo
 	public:
 		TextCanvasControl(MainPage^ page);
 		void initTextCanvas(double width,double height,double scale,WriteableBitmap^ previewImg);
-		void addTextLayoutItem(TextLayoutItem^ item);		
+		void addTextLayoutItem(TextLayoutItem^ item);	
+		void removeTextLayoutItem(TextLayoutItem^ item);
 		
 		Platform::Array<TextAttribute^>^ getItemAttributes();
 		Platform::Array<BYTE>^ getResultData();
@@ -37,5 +38,6 @@ namespace TextDemo
 		WriteableBitmap^	m_previewImg;
 		TextMask^			m_textMask;
 		MainPage^			m_pAdjustPage;
+		void OnTextCanvasPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 	};
 }

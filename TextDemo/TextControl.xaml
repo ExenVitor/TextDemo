@@ -13,6 +13,9 @@
         <StackPanel>
             <Button x:Name="AddText" Content="AddText" FontSize="18" Width="120" Height="50" HorizontalAlignment="Center" Click="onAddClick"/>
             <Button x:Name="Save" Content="Save" FontSize="18" Width="120" Height="50" HorizontalAlignment="Center" Click="onSaveClick"/>
+            <TextBox x:Name="TB_Input" FontSize="18" Width="200" Height="150"   HorizontalAlignment="Center" AcceptsReturn="True"  
+               TextWrapping="Wrap" Text="Please input text"
+               ScrollViewer.VerticalScrollBarVisibility="Visible"/>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -4,6 +4,7 @@
 //
 
 #include "pch.h"
+#include "TextControl.xaml.h"
 #include "TextCanvasControl.xaml.h"
 #include "TextLayoutItem.xaml.h"
 #include "TextMask.h"
@@ -91,6 +92,19 @@ void TextCanvasControl::addTextLayoutItem(TextLayoutItem^ item)
 	
 }
 
+void TextCanvasControl::removeTextLayoutItem(TextLayoutItem^ item)
+{
+	for(int num=textCanvas->Children->Size-1;num>=0;num--){
+		if(item==textCanvas->Children->GetAt(num)){
+			textCanvas->Children->RemoveAt(num);
+			updateTextMask();
+			break;
+		}
+	}
+	//if(TextFunctionCanvas->Children->Size == 0)
+	//	m_pAdjustPage->setNeedSave(false); //重新判断是否提示保存
+}
+
 
 
 Platform::Array<TextAttribute^>^ TextCanvasControl::getItemAttributes()
@@ -119,4 +133,9 @@ Platform::Array<TextAttribute^>^ TextCanvasControl::getItemAttributes()
 	}
 
 	return result;
+}
+
+void TextDemo::TextCanvasControl::OnTextCanvasPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
+{
+	m_pAdjustPage->getTextControl()->setCurrentItem(nullptr);
 }

@@ -20,6 +20,9 @@ namespace TextDemo
 		TextControl(MainPage^ page);
 		TextAttribute^ createTextAttribute();
 
+		void setCurrentItem(TextLayoutItem^ item);
+		void deleteTextItem(TextLayoutItem^ item);
+
 	private:
 		void onAddClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		MainPage^			m_pAdjustPage;

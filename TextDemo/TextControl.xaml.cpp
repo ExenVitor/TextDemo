@@ -90,7 +90,7 @@ TextControl::TextControl(MainPage^ page)
 TextAttribute^ TextControl::createTextAttribute()
 {
 	auto attri = ref new TextAttribute();
-	attri->textContent = L"Please input text";
+	attri->textContent = TB_Input->Text;
 	attri->size = 56;
 	attri->textFamily=L"Georgia";
 	attri->style = TextDemo::FontStyle::STYLE_NORMAL;
@@ -105,10 +105,26 @@ TextAttribute^ TextControl::createTextAttribute()
 	return attri;
 }
 
+void TextControl::setCurrentItem(TextLayoutItem^ item)
+{
+	if(m_currentTextItem != nullptr)
+		m_currentTextItem->showSelectBorder(false);
+	m_currentTextItem = item;
+	if(item != nullptr)
+		item->showSelectBorder(true);
+
+}
+
+void TextControl::deleteTextItem(TextLayoutItem^ item)
+{
+	m_pAdjustPage->getTextCanvasControl()->removeTextLayoutItem(item);
+	setCurrentItem(nullptr);
+}
+
 void TextDemo::TextControl::onAddClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	m_currentTextItem = ref new TextLayoutItem(this);
-	m_pAdjustPage->getTextCanvasControl()->addTextLayoutItem(m_currentTextItem);
+	auto item = ref new TextLayoutItem(this);
+	m_pAdjustPage->getTextCanvasControl()->addTextLayoutItem(item);
 }
 
 

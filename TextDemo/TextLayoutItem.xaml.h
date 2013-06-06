@@ -80,6 +80,7 @@ namespace TextDemo
 
 		void setCanvasControl(TextCanvasControl^ pControl) {m_pTextCanvasControl = pControl;}
 		TextAttribute ^				getTextAttribute();		
+		void showSelectBorder(bool isShow);
 
 	private:
 		void notifyChanged();
@@ -92,6 +93,7 @@ namespace TextDemo
 		//根据宽高计算合适的字号
 		float getMatchingsize(float width,float height);
 
+		
 		void UserControl_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
 		bool					m_isPressed;
@@ -114,5 +116,7 @@ namespace TextDemo
 		void SelectGridPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 		void SelectGridReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 		void SelectGridMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
+		void DeleteTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e);
+		void DeletePressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 	};
 }

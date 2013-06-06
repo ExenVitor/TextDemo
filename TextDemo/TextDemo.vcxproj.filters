@@ -38,6 +38,8 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="TextMask.cpp" />
     <ClCompile Include="TextCanvasControl.xaml.cpp" />
+    <ClCompile Include="TextControl.xaml.cpp" />
+    <ClCompile Include="TextLayoutItem.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -46,6 +48,8 @@
     <ClInclude Include="TextMask.h" />
     <ClInclude Include="DirectXHelper.h" />
     <ClInclude Include="TextCanvasControl.xaml.h" />
+    <ClInclude Include="TextControl.xaml.h" />
+    <ClInclude Include="TextLayoutItem.xaml.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

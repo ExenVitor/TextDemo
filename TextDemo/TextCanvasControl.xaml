@@ -11,6 +11,6 @@
     
     <Grid >
         <Image x:Name="maskView" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Canvas x:Name="textCanvas" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Canvas x:Name="textCanvas" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" PointerPressed="OnTextCanvasPressed" />
     </Grid>
 </UserControl>

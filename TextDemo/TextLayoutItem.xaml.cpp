@@ -161,6 +161,22 @@ TextAttribute^ TextLayoutItem::getTextAttribute()
 	return m_textAttribute;
 }
 
+void TextLayoutItem::showSelectBorder(bool isShow)
+{
+	if(isShow)
+	{
+		selectBorder->Opacity = 1.0;
+		img_delete->Opacity = 1.0;
+		img_rotate->Opacity = 1.0;
+	}
+	else
+	{
+		selectBorder->Opacity = 0.0;
+		img_delete->Opacity = 0.0;
+		img_rotate->Opacity = 0.0;
+	}
+}
+
 float TextLayoutItem::getMatchingsize(float width,float height)
 {
 	double textSize[2]={0,0};
@@ -204,6 +220,7 @@ void TextLayoutItem::notifyChanged()
 	auto parent = safe_cast<Canvas^>(this->Parent);
 	moveSelf((parent->ActualWidth - selectGrid->Width)/2.0,(parent->ActualHeight - selectGrid->Height)/2.0);
 	m_pTextCanvasControl->updateTextMask();
+	m_pTextControl->setCurrentItem(this);
 }
 
 void TextLayoutItem::scaleSelf(double scaleValue)
@@ -281,6 +298,7 @@ void TextDemo::TextLayoutItem::SelectGridPressed(Platform::Object^ sender, Windo
 	oldScale=m_textAttribute->scale;
 	oldAngle = 0;
 	m_isPressed = true;
+	m_pTextControl->setCurrentItem(this);
 }
 
 
@@ -360,8 +378,21 @@ void TextDemo::TextLayoutItem::SelectGridMoved(Platform::Object^ sender, Windows
 
 		////刷新界面控件数据
 		//m_pFunctionControl->eventLock=true;
-		//m_pFunctionControl->setCurrentItem(this);
+		m_pTextControl->setCurrentItem(this);
 		//m_pFunctionControl->eventLock=false;
 		m_pTextCanvasControl->updateTextMask();
 	}
+}
+
+
+void TextDemo::TextLayoutItem::DeleteTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::TappedRoutedEventArgs^ e)
+{
+	e->Handled = true;
+}
+
+
+void TextDemo::TextLayoutItem::DeletePressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
+{
+	m_pTextControl->deleteTextItem(this);
+	//m_pFunctionControl->saveTextData();
 }
