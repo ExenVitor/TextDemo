@@ -95,7 +95,7 @@ TextAttribute^ TextControl::createTextAttribute()
 	attri->textFamily=L"Georgia";
 	attri->style = TextDemo::FontStyle::STYLE_NORMAL;
 
-	attri->color = Windows::UI::Colors::White;
+	attri->color = Windows::UI::Colors::Blue;
 	attri->colorIndex = 0;
 	attri->angle = 0;
 
@@ -162,7 +162,11 @@ void TextDemo::TextControl::onSaveClick(Platform::Object^ sender, Windows::UI::X
 					{
 						encoderid =  BitmapEncoder::TiffEncoderId;
 					}						
-					return BitmapEncoder::CreateAsync(encoderid,stream);
+					auto bitmapPropertySet = ref new BitmapPropertySet();
+					auto qualityValue = ref new BitmapTypedValue(1.0,PropertyType::Single);
+					if(encoderid == BitmapEncoder::JpegEncoderId)
+						bitmapPropertySet->Insert(L"ImageQuality",qualityValue);
+					return BitmapEncoder::CreateAsync(encoderid,stream,bitmapPropertySet);
 				}).then([this,resultData,previewImg](BitmapEncoder^ enc){
 					int pxWidth = m_pAdjustPage->getTextCanvasControl()->getResultWidth();
 					int pxHeight = m_pAdjustPage->getTextCanvasControl()->getResultHeight();

@@ -399,6 +399,7 @@ Platform::Array<BYTE>^  TextMask::getSaveData(double width,double height,double 
 		m_d2dContext->SetTarget(nullptr);
 		m_pTargetBitmap = nullptr;
 		m_pRenderBitmap = nullptr;		
+		m_scale = 1.0;
 		return pData;
 	}
 	m_scale = 1.0;
