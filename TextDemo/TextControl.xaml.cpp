@@ -8,10 +8,13 @@
 #include "TextCanvasControl.xaml.h"
 #include "TextLayoutItem.xaml.h"
 #include "MainPage.xaml.h"
+#include "DirectXHelper.h"
 
 using namespace TextDemo;
 
+using namespace D2D1;
 using namespace Platform;
+using namespace Platform::Collections;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml;
@@ -25,6 +28,7 @@ using namespace Windows::Storage::Streams;
 using namespace Windows::Storage;
 using namespace Windows::Storage::Pickers;
 using namespace Windows::Graphics::Imaging;
+using namespace Microsoft::WRL;
 using namespace Concurrency;
 
 // “用户控件”项模板在 http://go.microsoft.com/fwlink/?LinkId=234236 上提供
@@ -85,6 +89,20 @@ TextControl::TextControl(MainPage^ page)
 {
 	InitializeComponent();
 	m_pAdjustPage = page;
+
+	m_isChinese = false;
+
+	initTextControl();
+}
+
+void TextControl::initTextControl()
+{
+	cob_FontFamily->DataContext = getFontFamily();
+	if(cob_FontFamily->Items->Size > 0)
+		cob_FontFamily->SelectedIndex = 0;
+	cob_Color->DataContext = getColors();
+	if(cob_Color->Items->Size > 0)
+		cob_Color->SelectedIndex = 0;
 }
 
 TextAttribute^ TextControl::createTextAttribute()
@@ -92,11 +110,12 @@ TextAttribute^ TextControl::createTextAttribute()
 	auto attri = ref new TextAttribute();
 	attri->textContent = TB_Input->Text;
 	attri->size = 56;
-	attri->textFamily=L"Georgia";
-	attri->style = TextDemo::FontStyle::STYLE_NORMAL;
+	attri->textFamily= safe_cast<Windows::UI::Xaml::Media::FontFamily^>(this->cob_FontFamily->SelectedItem)->Source;
+	attri->style = TextDemo::FontStyle::STYLE_BOLD | TextDemo::FontStyle::STYLE_OBLIQUE | TextDemo::FontStyle::STYLE_UNDERLINE;
 
-	attri->color = Windows::UI::Colors::Blue;
-	attri->colorIndex = 0;
+	Windows::UI::Color color= safe_cast<TextColors^>(cob_Color->SelectedValue)->Color;
+	attri->color = color;
+	attri->colorIndex = cob_Color->SelectedIndex;
 	attri->angle = 0;
 
 	attri->alpha = 100;
@@ -119,6 +138,177 @@ void TextControl::deleteTextItem(TextLayoutItem^ item)
 {
 	m_pAdjustPage->getTextCanvasControl()->removeTextLayoutItem(item);
 	setCurrentItem(nullptr);
+}
+
+Vector<TextColors^>^ TextControl::getColors()
+{
+	auto resultVector=ref new Platform::Collections::Vector<TextColors^>();
+	int colorValue[23] = {
+		0xffffff,
+		0x424242,
+		0x000000,
+		0xA4C400,
+		0x60A917,
+		0x008A00,
+		0x00ABA9,
+		0x1BA1E2,
+		0x0050EF,
+		0x6A00FF,
+		0xAA00FF,
+		0xF472D0,
+		0xD80073,
+		0xA20025,
+		0xE51400,
+		0xFA6800,
+		0xF0A30A,
+		0xE3C800,
+		0x825A2C,
+		0x6D8764,
+		0x647687,
+		0x76608A,
+		0x87794E,
+	};	
+	int len=sizeof(colorValue)/4;
+	for(int i=0;i<len;i++){		
+		auto color = ref new TextColors();
+		color->Color = Windows::UI::ColorHelper::FromArgb(
+			0xff,
+			colorValue[i]>>16,
+			colorValue[i]>>8&0xFF,
+			colorValue[i]&0x0000FF);
+		resultVector->Append(color);
+	}
+	return resultVector;
+}
+
+Vector<Windows::UI::Xaml::Media::FontFamily ^>^ TextControl::getFontFamily()
+{
+	auto resultVector = ref new Vector<Windows::UI::Xaml::Media::FontFamily^>();
+	ComPtr<IDWriteFactory> pDWriteFactory;
+	ComPtr<IDWriteFontCollection> pFontCollection;
+
+	HRESULT hr = DWriteCreateFactory(
+            DWRITE_FACTORY_TYPE_SHARED,
+            __uuidof(IDWriteFactory),
+            &pDWriteFactory
+            );
+
+	if (SUCCEEDED(hr))
+    {
+		pDWriteFactory->GetSystemFontCollection(&pFontCollection);
+	}
+
+	 UINT32 familyCount = 0;
+
+    // Get the number of font families in the collection.
+    if (SUCCEEDED(hr))
+    {
+        familyCount = pFontCollection->GetFontFamilyCount();
+    }
+	
+    for (UINT32 i = 0; i < familyCount; ++i)
+    {
+        ComPtr<IDWriteFontFamily> pFontFamily;
+
+        // Get the font family.
+        if (SUCCEEDED(hr))
+        {
+            hr = pFontCollection->GetFontFamily(i, &pFontFamily);
+        }
+
+        ComPtr<IDWriteLocalizedStrings> pFamilyNames;
+        // Get a list of localized strings for the family name.
+        if (SUCCEEDED(hr))
+        {
+            hr = pFontFamily->GetFamilyNames(&pFamilyNames);
+        }
+
+        UINT32 index = 0;
+        BOOL exists = false;
+        
+        wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
+
+        if (SUCCEEDED(hr))
+        {
+            // Get the default locale for this user.
+            int defaultLocaleSuccess = GetUserDefaultLocaleName(localeName, LOCALE_NAME_MAX_LENGTH);
+
+            // If the default locale is returned, find that locale name, otherwise use "en-us".
+            if (defaultLocaleSuccess)
+            {
+                hr = pFamilyNames->FindLocaleName(localeName, &index, &exists);
+            }
+            if (SUCCEEDED(hr) && !exists) // if the above find did not find a match, retry with US English
+            {
+                hr = pFamilyNames->FindLocaleName(L"en-us", &index, &exists);
+            }
+        }
+        
+        // If the specified locale doesn't exist, select the first on the list.
+        if (!exists)
+            index = 0;
+
+        UINT32 length = 0;
+
+        // Get the string length.
+        if (SUCCEEDED(hr))
+        {
+            hr = pFamilyNames->GetStringLength(index, &length);
+        }
+
+        // Allocate a string big enough to hold the name.
+		wchar_t* name=new (std::nothrow)wchar_t[length+1];
+        if (name == NULL)
+        {
+            hr = E_OUTOFMEMORY;
+        }
+
+        // Get the family name.
+        if (SUCCEEDED(hr))
+        {
+            hr = pFamilyNames->GetString(index, name, length+1);
+			
+        }
+        if (SUCCEEDED(hr))
+        {
+			
+			Platform::String^ tempstr=ref new Platform::String(name);
+			auto family = ref new Windows::UI::Xaml::Media::FontFamily(tempstr);
+			resultVector->Append(family);			
+        }
+		
+		pFontFamily = nullptr;
+		pFamilyNames = nullptr;
+        delete [] name;
+   }
+
+	pFontCollection = nullptr;
+	pDWriteFactory = nullptr;
+	//对集合进行排序
+	int k;
+	int j;
+	Windows::UI::Xaml::Media::FontFamily^ tmp;
+	for(int i=0;i<resultVector->Size;i++){
+		k=i;
+		for(j=i+1;j<resultVector->Size;j++){
+			if(m_isChinese){
+				if(resultVector->GetAt(k)->Source<resultVector->GetAt(j)->Source){
+					k=j;
+				}
+			}else{
+				if(resultVector->GetAt(k)->Source>resultVector->GetAt(j)->Source){
+					k=j;
+				}
+			}
+		}
+		if(k!=i){
+			tmp=resultVector->GetAt(k);
+			resultVector->SetAt(k,resultVector->GetAt(i));
+			resultVector->SetAt(i,tmp);
+		}
+	}
+  return resultVector;
+
 }
 
 void TextDemo::TextControl::onAddClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
@@ -204,4 +394,18 @@ void TextDemo::TextControl::onSaveClick(Platform::Object^ sender, Windows::UI::X
 			}
 		});
 	}
+}
+
+
+void TextDemo::TextControl::onSelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+{
+	auto comboBox = safe_cast<ComboBox^>(sender);
+	if(comboBox->SelectedIndex < 0)
+		return;
+	if(cob_FontFamily == comboBox)
+	{
+		cob_FontFamily->FontFamily = safe_cast<Windows::UI::Xaml::Media::FontFamily^>(cob_FontFamily->SelectedItem);
+	}
+	
+	
 }

@@ -213,7 +213,7 @@ void TextMask::RenderText(TextAttribute^ attri)
 		attri->textFamily->Data(),
 		nullptr,
 		(int)(attri->style&TextDemo::FontStyle::STYLE_BOLD) ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
-		(int)(attri->style& TextDemo::FontStyle::STYLE_OBLIQUE) ? DWRITE_FONT_STYLE_OBLIQUE : DWRITE_FONT_STYLE_NORMAL,
+		(int)(attri->style& TextDemo::FontStyle::STYLE_OBLIQUE) ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
 		attri->size / m_scale,
 		L"en-US",
@@ -265,6 +265,11 @@ void TextMask::RenderText(TextAttribute^ attri)
 	//		baseline->baseLine/orgScale*(attribute->size/40))
 	//		);
 	//}
+
+	DX::ThrowIfFailed(m_textLayout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM,
+			attri->size / m_scale / 0.8,
+			attri->size / m_scale)
+			);
 	DX::ThrowIfFailed(
 		m_textLayout->GetMetrics(&m_textMetrics)
 		);

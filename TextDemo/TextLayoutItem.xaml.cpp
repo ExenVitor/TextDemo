@@ -127,6 +127,17 @@ void getCharacterSize(Platform::String^ str,
 		m_textLayout->SetUnderline(hasUnderLine,
 		textRange);
 	}
+
+	DWRITE_LINE_SPACING_METHOD lineMethod;
+	FLOAT lineSpacing,lineBase;
+	if(SUCCEEDED(hr))
+	{
+		m_textLayout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM,
+			(fontSize + 5) / 0.8,
+			fontSize + 5);
+			
+	}
+
 	if (SUCCEEDED(hr))
     {
 		hr=m_textLayout->GetMetrics(&m_textMetrics);
@@ -185,7 +196,7 @@ float TextLayoutItem::getMatchingsize(float width,float height)
 					 m_textAttribute->textFamily,
 					 i,
 					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_BOLD)?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL,
-					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_OBLIQUE)?DWRITE_FONT_STYLE_OBLIQUE:DWRITE_FONT_STYLE_NORMAL,
+					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_OBLIQUE)?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,
 					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_UNDERLINE)?true:false,
 					 DWRITE_FONT_STRETCH_NORMAL,
 					 width,height,
@@ -205,13 +216,13 @@ void TextLayoutItem::notifyChanged()
 		m_textAttribute->textFamily,
 		m_textAttribute->size,
 		(int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_BOLD)?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL,
-		(int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_OBLIQUE)?DWRITE_FONT_STYLE_OBLIQUE:DWRITE_FONT_STYLE_NORMAL,
+		(int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_OBLIQUE)?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,
 		(int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_UNDERLINE)?true:false,
 		DWRITE_FONT_STRETCH_NORMAL,
 		5000,5000,
 		textSize);
 
-	selectGrid->Width = textSize[0];
+	selectGrid->Width = textSize[0] + 10;
 	selectGrid->Height = textSize[1];
 
 	m_textAttribute->width=selectGrid->Width;
