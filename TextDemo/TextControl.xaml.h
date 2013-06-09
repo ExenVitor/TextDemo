@@ -35,6 +35,8 @@ namespace TextDemo
 		void setCurrentItem(TextLayoutItem^ item);
 		void deleteTextItem(TextLayoutItem^ item);
 
+		property bool EventLock;
+
 
 	private:
 		void onAddClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);

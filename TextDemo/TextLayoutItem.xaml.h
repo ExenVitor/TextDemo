@@ -45,6 +45,7 @@ namespace TextDemo
 			tmp->top = top;
 			tmp->lineHight = lineHight;
 			tmp->Zindex = Zindex;
+			tmp->isCenterScale = isCenterScale;
 			
 			return tmp;
 		}
@@ -66,6 +67,7 @@ namespace TextDemo
 		property double												top;
 		property double												lineHight;
 		property int												Zindex;
+		property bool												isCenterScale;
 	};
 
 	enum ItemAction{
@@ -76,26 +78,27 @@ namespace TextDemo
 	public ref class TextLayoutItem sealed
 	{
 	public:
-		TextLayoutItem(TextControl^ textControl);
-
-		void setCanvasControl(TextCanvasControl^ pControl) {m_pTextCanvasControl = pControl;}
+		TextLayoutItem(TextControl^ textControl,TextCanvasControl^ canvasControl);
+		void notifyChanged();
+		
 		TextAttribute ^				getTextAttribute();		
 		void showSelectBorder(bool isShow);
 
 	private:
-		void notifyChanged();
+		
 		//移动自己在父控件中的位置
 		void moveSelf(double disX,double disY);
 		//缩放文本
 		void scaleSelf(double scaleValue);
 		//旋转控件本身
-		void rotateSelf(double angle);
+		void rotateSelf(double angle,double centerX,double centerY);
 		//根据宽高计算合适的字号
 		float getMatchingsize(float width,float height);
 
 		
 		void UserControl_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
+		bool					m_isInit;
 		bool					m_isPressed;
 		bool					m_isChanged;
 		TextAttribute^			m_textAttribute;

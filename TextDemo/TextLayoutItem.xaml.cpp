@@ -24,6 +24,16 @@ using namespace Windows::Devices::Input;
 
 // “用户控件”项模板在 http://go.microsoft.com/fwlink/?LinkId=234236 上提供
 
+double angleToRadian(double angle)
+{
+	return angle * 3.1415926 / 180;
+}
+
+double radianToAngle(double radian)
+{
+	return radian * 180 / 3.1415926;
+}
+
 //移动对象到顶层
 void bringToFront(Windows::UI::Xaml::Controls::Canvas^ parent,Windows::UI::Xaml::UIElement^ child){
 	unsigned childCount = parent->Children->Size;
@@ -66,9 +76,10 @@ double getAngle(double centerX,double centerY,double x1,double y1,double x2,doub
 		result = -result;
 	}
 	
-	return result * 180 / 3.1415926;
-
+	return radianToAngle(result);
 }
+
+
 
 //获取指定文字的宽高
 void getCharacterSize(Platform::String^ str,
@@ -149,10 +160,11 @@ void getCharacterSize(Platform::String^ str,
 	}	
 }
 
-TextLayoutItem::TextLayoutItem(TextControl^ textControl)
+TextLayoutItem::TextLayoutItem(TextControl^ textControl,TextCanvasControl^ canvasControl)
 {
 	InitializeComponent();
 	m_pTextControl = textControl;
+	m_pTextCanvasControl = canvasControl;
 	m_textAttribute = m_pTextControl->createTextAttribute();
 	m_itemAction = ItemAction::NONE;
 	eventDwon_x = 0.0;
@@ -164,6 +176,7 @@ TextLayoutItem::TextLayoutItem(TextControl^ textControl)
 	oldAngle = 1.0;
 	m_isChanged = false;
 	m_isPressed = false;
+	m_isInit = true;
 
 }
 
@@ -221,17 +234,69 @@ void TextLayoutItem::notifyChanged()
 		DWRITE_FONT_STRETCH_NORMAL,
 		5000,5000,
 		textSize);
-
+	auto parent = safe_cast<Canvas^>(this->Parent);	
+	double preLeft = parent->GetLeft(this);
+	double preTop = parent->GetTop(this);
+	
 	selectGrid->Width = textSize[0] + 10;
-	selectGrid->Height = textSize[1];
+	selectGrid->Height = textSize[1] + 10;
 
+	double preLayoutWidth = m_textAttribute->width;
+	double preLayoutHeight = m_textAttribute->height;
 	m_textAttribute->width=selectGrid->Width;
 	m_textAttribute->height=selectGrid->Height;
 
-	auto parent = safe_cast<Canvas^>(this->Parent);
-	moveSelf((parent->ActualWidth - selectGrid->Width)/2.0,(parent->ActualHeight - selectGrid->Height)/2.0);
+
+	
+	if(m_isInit)
+	{
+		moveSelf((parent->ActualWidth - selectGrid->Width)/2.0,(parent->ActualHeight - selectGrid->Height)/2.0);
+
+		m_isInit = false;
+	}
+	else
+	{
+		double maxTxtScaleX = parent->ActualWidth / (m_textAttribute->width + img_delete->Width);
+		double maxTxtScaleY = parent->ActualHeight / (m_textAttribute->height + img_delete->Height);
+		double maxTxtScale = maxTxtScaleX < maxTxtScaleY ? maxTxtScaleX : maxTxtScaleY;		
+
+
+		double preScale = m_textAttribute->scale;
+		if(m_textAttribute->scale > maxTxtScale)
+			m_textAttribute->scale = maxTxtScale;		
+		selectGrid->Width = m_textAttribute->width * m_textAttribute->scale;
+		selectGrid->Height = m_textAttribute->height * m_textAttribute->scale;		
+	
+		
+		//重新调整旋转中心点和位移，保证选择框最终左上点保持不变
+		RotateTransform^ preRotateTrans = safe_cast<RotateTransform^>(selectGrid->RenderTransform);
+		RotateTransform^ curRotateTrans = ref new RotateTransform();
+		curRotateTrans->CenterX = selectGrid->Width / 2.0;
+		curRotateTrans->CenterY = selectGrid->Height / 2.0;
+		curRotateTrans->Angle = m_textAttribute->angle;
+
+		auto preLeftTop = preRotateTrans->TransformPoint(Point(preLeft,preTop));
+		auto curLeftTop = curRotateTrans->TransformPoint(Point(preLeft,preTop));
+
+		parent->SetLeft(this,preLeft + (preLeftTop.X - curLeftTop.X));
+		parent->SetTop(this,preTop + (preLeftTop.Y - curLeftTop.Y));
+
+		UpdateLayout();
+		
+		rotateSelf(m_textAttribute->angle,curRotateTrans->CenterX,curRotateTrans->CenterY);	
+
+		double newCenterX = parent->GetLeft(this) + curRotateTrans->CenterX;
+		double newCenterY = parent->GetTop(this) + curRotateTrans->CenterY;
+
+		m_textAttribute->left = newCenterX - m_textAttribute->width / 2.0;
+		m_textAttribute->top = newCenterY - m_textAttribute->height / 2.0;
+
+	}
+	
 	m_pTextCanvasControl->updateTextMask();
+	m_pTextControl->EventLock = true;
 	m_pTextControl->setCurrentItem(this);
+	m_pTextControl->EventLock = false;
 }
 
 void TextLayoutItem::scaleSelf(double scaleValue)
@@ -244,20 +309,15 @@ void TextLayoutItem::scaleSelf(double scaleValue)
 	double disY = (orgHeight - selectGrid->Height) / 2.0;
 
 	auto parent = safe_cast<Canvas^>(this->Parent);
-	double halfW = selectGrid->Width / 2.0;
-	double halfH = selectGrid->Height / 2.0;
-	double newX = parent->GetLeft(this) + disX;
-	double newY = parent->GetTop(this) + disY;
-	
+		
 	parent->SetLeft(this,parent->GetLeft(this)+disX);
 	parent->SetTop(this,parent->GetTop(this)+disY);
 	
 }
 
-void TextLayoutItem::rotateSelf(double angle)
+void TextLayoutItem::rotateSelf(double angle,double centerX,double centerY)
 {
-	double centerX = selectGrid->Width / 2.0;
-	double centerY = selectGrid->Height / 2.0;
+	
 	RotateTransform^ rotateTrans = safe_cast<RotateTransform^>(selectGrid->RenderTransform);
 	rotateTrans->Angle = m_textAttribute->angle;
 	rotateTrans->CenterX=centerX;
@@ -309,7 +369,9 @@ void TextDemo::TextLayoutItem::SelectGridPressed(Platform::Object^ sender, Windo
 	oldScale=m_textAttribute->scale;
 	oldAngle = 0;
 	m_isPressed = true;
+	m_pTextControl->EventLock = true;
 	m_pTextControl->setCurrentItem(this);
+	m_pTextControl->EventLock = false;
 }
 
 
@@ -385,12 +447,14 @@ void TextDemo::TextLayoutItem::SelectGridMoved(Platform::Object^ sender, Windows
 		m_textAttribute->angle += angleOffset ;
 		if(m_textAttribute->angle >= 360) m_textAttribute->angle -= 360;		
 		if(m_textAttribute->angle<0) m_textAttribute->angle+=360;
-		rotateSelf(m_textAttribute->angle);
+		double gridCenterX = selectGrid->Width / 2.0;
+		double gridCenterY = selectGrid->Height / 2.0;
+		rotateSelf(m_textAttribute->angle,gridCenterX,gridCenterY);
 
 		////刷新界面控件数据
-		//m_pFunctionControl->eventLock=true;
+		m_pTextControl->EventLock = true;
 		m_pTextControl->setCurrentItem(this);
-		//m_pFunctionControl->eventLock=false;
+		m_pTextControl->EventLock = false;
 		m_pTextCanvasControl->updateTextMask();
 	}
 }

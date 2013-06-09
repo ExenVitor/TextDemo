@@ -84,7 +84,6 @@ void TextCanvasControl::updateTextMask()
 
 void TextCanvasControl::addTextLayoutItem(TextLayoutItem^ item)
 {
-	item->setCanvasControl(this);
 	textCanvas->Children->Append(item);
 	textCanvas->UpdateLayout();
 	item->UpdateLayout();

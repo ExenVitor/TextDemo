@@ -91,6 +91,7 @@ TextControl::TextControl(MainPage^ page)
 	m_pAdjustPage = page;
 
 	m_isChinese = false;
+	EventLock = false;
 
 	initTextControl();
 }
@@ -120,6 +121,7 @@ TextAttribute^ TextControl::createTextAttribute()
 
 	attri->alpha = 100;
 	attri->scale = 1.0;
+	attri->isCenterScale = true;
 
 	return attri;
 }
@@ -130,7 +132,23 @@ void TextControl::setCurrentItem(TextLayoutItem^ item)
 		m_currentTextItem->showSelectBorder(false);
 	m_currentTextItem = item;
 	if(item != nullptr)
+	{
 		item->showSelectBorder(true);
+		auto attri = item->getTextAttribute();		
+		auto fontFamily = ref new Windows::UI::Xaml::Media::FontFamily(attri->textFamily);
+		cob_FontFamily->SelectedItem = fontFamily;
+		cob_FontFamily->FontFamily = fontFamily;
+		cob_Color->SelectedIndex = attri->colorIndex;
+		TB_Input->Text = attri->textContent;
+	}
+	else
+	{
+		cob_FontFamily->SelectedIndex = 0;
+		cob_FontFamily->FontFamily = safe_cast<Windows::UI::Xaml::Media::FontFamily^>(cob_FontFamily->SelectedItem);
+		cob_Color->SelectedIndex = 0;
+		TB_Input->Text = L"Please input text";
+	}
+		
 
 }
 
@@ -313,7 +331,7 @@ Vector<Windows::UI::Xaml::Media::FontFamily ^>^ TextControl::getFontFamily()
 
 void TextDemo::TextControl::onAddClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	auto item = ref new TextLayoutItem(this);
+	auto item = ref new TextLayoutItem(this,m_pAdjustPage->getTextCanvasControl());
 	m_pAdjustPage->getTextCanvasControl()->addTextLayoutItem(item);
 }
 
@@ -405,6 +423,20 @@ void TextDemo::TextControl::onSelectionChanged(Platform::Object^ sender, Windows
 	if(cob_FontFamily == comboBox)
 	{
 		cob_FontFamily->FontFamily = safe_cast<Windows::UI::Xaml::Media::FontFamily^>(cob_FontFamily->SelectedItem);
+	}
+	if(m_currentTextItem == nullptr || EventLock == true)
+		return;
+	if(cob_FontFamily == comboBox)
+	{		
+		m_currentTextItem->getTextAttribute()->textFamily = cob_FontFamily->FontFamily->Source;
+		m_currentTextItem->notifyChanged();
+	}
+	else if(cob_Color == comboBox)
+	{
+		auto color = safe_cast<TextColors^>(cob_Color->SelectedItem)->Color;
+		m_currentTextItem->getTextAttribute()->color = color;
+		m_currentTextItem->getTextAttribute()->colorIndex = cob_Color->SelectedIndex;
+		m_currentTextItem->notifyChanged();
 	}
 	
 	
