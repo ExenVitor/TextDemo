@@ -44,10 +44,15 @@ namespace TextDemo
 		void onSelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 		Platform::Collections::Vector<TextColors^>^ getColors();
 		Platform::Collections::Vector<Windows::UI::Xaml::Media::FontFamily^>^ getFontFamily();
+		TextDemo::FontStyle getCurrentFontStyle();
+		void setCurrentFontStyle(TextDemo::FontStyle style);
 
 		MainPage^			m_pAdjustPage;
 		TextLayoutItem^		m_currentTextItem;
 		bool				m_isChinese;
 		
+		void OnInputTextChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::TextChangedEventArgs^ e);
+		void OnAlignChecked(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void OnTextStyle_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }

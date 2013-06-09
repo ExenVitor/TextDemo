@@ -6,6 +6,7 @@
 #pragma once
 
 #include "TextLayoutItem.g.h"
+using namespace Windows::UI::Xaml;
 
 namespace TextDemo
 {
@@ -14,7 +15,7 @@ namespace TextDemo
 		{
 			STYLE_NORMAL=1,
 			STYLE_BOLD=2<<0,
-			STYLE_OBLIQUE=2<<1,
+			STYLE_ITALIC=2<<1,
 			STYLE_UNDERLINE=2<<2
 		};
 
@@ -30,9 +31,11 @@ namespace TextDemo
 			tmp->textContent = ref new Platform::String(textContent->Data());
 			tmp->textFamily = ref new Platform::String(textFamily->Data());
 			tmp->bgimageUri = ref new Platform::String(bgimageUri->Data());
+			tmp->textFamilyIndex = textFamilyIndex;
 			tmp->color = color;
 			tmp->colorIndex = colorIndex;
 			
+			tmp->textAlignment = textAlignment;
 			tmp->style = style;
 			tmp->size = size;
 			tmp->angle = angle;
@@ -44,16 +47,17 @@ namespace TextDemo
 			tmp->left = left;
 			tmp->top = top;
 			tmp->lineHight = lineHight;
-			tmp->Zindex = Zindex;
-			tmp->isCenterScale = isCenterScale;
+			tmp->Zindex = Zindex;			
 			
 			return tmp;
 		}
 		property Platform::String^									textContent;
 		property Platform::String^									textFamily;
+		property int												textFamilyIndex;
 		property Platform::String^									bgimageUri;	
 		property Windows::UI::Color									color;
 		property int												colorIndex;
+		property TextAlignment										textAlignment;
 		
 		property FontStyle											style;
 		property double												size;
@@ -66,8 +70,7 @@ namespace TextDemo
 		property double												left;
 		property double												top;
 		property double												lineHight;
-		property int												Zindex;
-		property bool												isCenterScale;
+		property int												Zindex;		
 	};
 
 	enum ItemAction{

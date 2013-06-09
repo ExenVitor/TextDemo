@@ -183,8 +183,11 @@
     <Image Include="Assets\SmallLogo.png" />
     <Image Include="Assets\StoreLogo.png" />
     <Image Include="Assets\SplashScreen.png" />
+    <Image Include="images\text\bold.png" />
     <Image Include="images\text\delete.png" />
+    <Image Include="images\text\italic.png" />
     <Image Include="images\text\rotate.png" />
+    <Image Include="images\text\underline.png" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp">

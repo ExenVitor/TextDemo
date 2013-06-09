@@ -112,16 +112,18 @@ TextAttribute^ TextControl::createTextAttribute()
 	attri->textContent = TB_Input->Text;
 	attri->size = 56;
 	attri->textFamily= safe_cast<Windows::UI::Xaml::Media::FontFamily^>(this->cob_FontFamily->SelectedItem)->Source;
-	attri->style = TextDemo::FontStyle::STYLE_BOLD | TextDemo::FontStyle::STYLE_OBLIQUE | TextDemo::FontStyle::STYLE_UNDERLINE;
+	attri->style = getCurrentFontStyle();
 
 	Windows::UI::Color color= safe_cast<TextColors^>(cob_Color->SelectedValue)->Color;
 	attri->color = color;
 	attri->colorIndex = cob_Color->SelectedIndex;
+
+	attri->textAlignment = TextAlignment::Left;
 	attri->angle = 0;
 
 	attri->alpha = 100;
 	attri->scale = 1.0;
-	attri->isCenterScale = true;
+	
 
 	return attri;
 }
@@ -136,9 +138,16 @@ void TextControl::setCurrentItem(TextLayoutItem^ item)
 		item->showSelectBorder(true);
 		auto attri = item->getTextAttribute();		
 		auto fontFamily = ref new Windows::UI::Xaml::Media::FontFamily(attri->textFamily);
-		cob_FontFamily->SelectedItem = fontFamily;
+		cob_FontFamily->SelectedIndex = attri->textFamilyIndex;
 		cob_FontFamily->FontFamily = fontFamily;
 		cob_Color->SelectedIndex = attri->colorIndex;
+		if(attri->textAlignment == TextAlignment::Left)
+			align_Left->IsChecked = true;
+		else if(attri->textAlignment == TextAlignment::Center)
+			align_Center->IsChecked = true;
+		else if(attri->textAlignment == TextAlignment::Right)
+			align_Right->IsChecked = true;
+		setCurrentFontStyle(attri->style);
 		TB_Input->Text = attri->textContent;
 	}
 	else
@@ -146,6 +155,7 @@ void TextControl::setCurrentItem(TextLayoutItem^ item)
 		cob_FontFamily->SelectedIndex = 0;
 		cob_FontFamily->FontFamily = safe_cast<Windows::UI::Xaml::Media::FontFamily^>(cob_FontFamily->SelectedItem);
 		cob_Color->SelectedIndex = 0;
+		align_Left->IsChecked = true;
 		TB_Input->Text = L"Please input text";
 	}
 		
@@ -414,6 +424,38 @@ void TextDemo::TextControl::onSaveClick(Platform::Object^ sender, Windows::UI::X
 	}
 }
 
+TextDemo::FontStyle TextControl::getCurrentFontStyle(){
+	TextDemo::FontStyle fontStyle= TextDemo::FontStyle::STYLE_NORMAL;
+	if(checkBox_Bold->IsChecked->Value){
+		fontStyle = fontStyle | TextDemo::FontStyle::STYLE_BOLD;
+	}
+	if(checkBox_Italic->IsChecked->Value){
+		fontStyle = fontStyle | TextDemo::FontStyle::STYLE_ITALIC;
+	}
+	if(checkBox_undeline->IsChecked->Value){
+		fontStyle = fontStyle | TextDemo::FontStyle::STYLE_UNDERLINE;
+	}
+	return fontStyle;
+}
+
+void TextControl::setCurrentFontStyle(TextDemo::FontStyle fontStyle)
+{
+	if((bool)(fontStyle & TextDemo::FontStyle::STYLE_BOLD)){
+		checkBox_Bold->IsChecked=true;
+	}else{
+		checkBox_Bold->IsChecked=false;
+	}
+	if((bool)(fontStyle & TextDemo::FontStyle::STYLE_ITALIC)){
+		checkBox_Italic->IsChecked=true;
+	}else{
+		checkBox_Italic->IsChecked=false;
+	}
+	if((bool)(fontStyle & TextDemo::FontStyle::STYLE_UNDERLINE)){
+		checkBox_undeline->IsChecked=true;
+	}else{
+		checkBox_undeline->IsChecked=false;
+	}
+}
 
 void TextDemo::TextControl::onSelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
 {
@@ -429,6 +471,7 @@ void TextDemo::TextControl::onSelectionChanged(Platform::Object^ sender, Windows
 	if(cob_FontFamily == comboBox)
 	{		
 		m_currentTextItem->getTextAttribute()->textFamily = cob_FontFamily->FontFamily->Source;
+		m_currentTextItem->getTextAttribute()->textFamilyIndex = cob_FontFamily->SelectedIndex;
 		m_currentTextItem->notifyChanged();
 	}
 	else if(cob_Color == comboBox)
@@ -440,4 +483,47 @@ void TextDemo::TextControl::onSelectionChanged(Platform::Object^ sender, Windows
 	}
 	
 	
+}
+
+
+void TextDemo::TextControl::OnInputTextChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::TextChangedEventArgs^ e)
+{
+	if(m_currentTextItem == nullptr || EventLock == true)
+		return;
+	m_currentTextItem->getTextAttribute()->textContent = TB_Input->Text;
+	m_currentTextItem->notifyChanged();
+	
+}
+
+
+void TextDemo::TextControl::OnAlignChecked(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	if(m_currentTextItem == nullptr || EventLock == true)
+		return;
+	TextAlignment align;
+	auto alignBtn = safe_cast<RadioButton^>(sender);
+	if(align_Left == alignBtn)
+		align = TextAlignment::Left;
+	else if(align_Center == alignBtn)
+		align = TextAlignment::Center;
+	else if(align_Right == alignBtn)
+		align = TextAlignment::Right;
+	m_currentTextItem->getTextAttribute()->textAlignment = align;
+	m_currentTextItem->notifyChanged();
+}
+
+
+void TextDemo::TextControl::OnTextStyle_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	if(m_currentTextItem == nullptr || EventLock == true)
+		return;
+	bool isChange=false;
+	if(m_currentTextItem->getTextAttribute()->style!=getCurrentFontStyle()){
+		isChange=true;
+	}
+	m_currentTextItem->getTextAttribute()->style=getCurrentFontStyle();
+	m_currentTextItem->notifyChanged();
+	/*m_pAdjustPage->setNeedSave(true);
+	if(isChange)
+		saveTextData();*/
 }

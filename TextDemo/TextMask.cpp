@@ -8,6 +8,7 @@ using namespace TextDemo;
 using namespace Microsoft::WRL;
 using namespace Windows::Storage;
 using namespace Windows::ApplicationModel;
+using namespace Windows::UI::Xaml;
 
 const float defaultDpi = 96.0;
 
@@ -202,8 +203,6 @@ void TextMask::EndDraw()
         );
 }
 
-float preCenterX = 0.0;
-float preCenterY = 0.0;
 
 void TextMask::RenderText(TextAttribute^ attri)
 {
@@ -216,15 +215,24 @@ void TextMask::RenderText(TextAttribute^ attri)
 		attri->textFamily->Data(),
 		nullptr,
 		(int)(attri->style&TextDemo::FontStyle::STYLE_BOLD) ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL,
-		(int)(attri->style& TextDemo::FontStyle::STYLE_OBLIQUE) ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
+		(int)(attri->style& TextDemo::FontStyle::STYLE_ITALIC) ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL,
 		attri->size / m_scale,
 		L"en-US",
 		&m_textFormat
 		)
 		);
+
+	DWRITE_TEXT_ALIGNMENT align;
+	if(attri->textAlignment == TextAlignment::Center)
+		align = DWRITE_TEXT_ALIGNMENT_CENTER;
+	else if(attri->textAlignment == TextAlignment::Left)
+		align = DWRITE_TEXT_ALIGNMENT_LEADING;
+	else if(attri->textAlignment == TextAlignment::Right)
+		align = DWRITE_TEXT_ALIGNMENT_TRAILING;
+
 	DX::ThrowIfFailed(
-		m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER)
+		m_textFormat->SetTextAlignment(align)
 		);
 
 	DX::ThrowIfFailed(
@@ -259,16 +267,6 @@ void TextMask::RenderText(TextAttribute^ attri)
 		textRange)
 		);
 
-	////×ÖÌåÊÊÅä
-	//FontBaseLine^ baseline=getFontBaseLineFromName(attribute->textFamily);
-	//if(baseline!=nullptr){
-	//	DX::ThrowIfFailed(
-	//		m_textLayout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM,
-	//		baseline->lineSpace/orgScale*(attribute->size/40),
-	//		baseline->baseLine/orgScale*(attribute->size/40))
-	//		);
-	//}
-
 	DX::ThrowIfFailed(m_textLayout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM,
 			attri->size / m_scale / 0.8,
 			attri->size / m_scale)
@@ -290,54 +288,16 @@ void TextMask::RenderText(TextAttribute^ attri)
 
 	Matrix3x2F scaleTranslation;
 	Matrix3x2F rotateTranslation;
-	
-	if(attri->isCenterScale)
-	{
-		scaleTranslation = Matrix3x2F::Scale(attri->scale,attri->scale,D2D1::Point2F(
-		centerX,centerY
-		));
-	/*	translation.SetProduct(
-		translation,
-		Matrix3x2F::Scale(attri->scale,attri->scale,D2D1::Point2F(
-		centerX,centerY
-		))
-		);*/
-		preCenterX = centerX;
-		preCenterY = centerY;
-	}
-	else
-		scaleTranslation = Matrix3x2F::Scale(attri->scale,attri->scale,D2D1::Point2F(
-		preCenterX,preCenterY
-		));
-		/*translation.SetProduct(
-		translation,
-		Matrix3x2F::Scale(attri->scale,attri->scale,D2D1::Point2F(
-		0,0
-		))
-		);*/
 
-	if(attri->isCenterScale)
-		/*translation.SetProduct(
-		translation,
-		Matrix3x2F::Rotation(attri->angle,
-		D2D1::Point2F(
+	scaleTranslation = Matrix3x2F::Scale(attri->scale,attri->scale,D2D1::Point2F(
 		centerX,centerY
-		)
-		));*/
-		rotateTranslation = Matrix3x2F::Rotation(attri->angle,
+		));
+
+	rotateTranslation = Matrix3x2F::Rotation(attri->angle,
 		D2D1::Point2F(
 		centerX,centerY
 		)
 		);	
-	else
-		rotateTranslation = Matrix3x2F::Rotation(attri->angle,
-		D2D1::Point2F(
-		preCenterX,preCenterY
-		)
-		);	
-
-	
-	attri->isCenterScale = true;
 
 	m_d2dContext->SetTransform(scaleTranslation * rotateTranslation);
 	m_d2dContext->DrawTextLayout(

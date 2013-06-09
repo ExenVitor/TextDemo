@@ -24,6 +24,8 @@ using namespace Windows::Devices::Input;
 
 // “用户控件”项模板在 http://go.microsoft.com/fwlink/?LinkId=234236 上提供
 
+const int selectMargin = 40;
+
 double angleToRadian(double angle)
 {
 	return angle * 3.1415926 / 180;
@@ -88,6 +90,7 @@ void getCharacterSize(Platform::String^ str,
 					  DWRITE_FONT_WEIGHT weight,
 					  DWRITE_FONT_STYLE style,
 					  bool hasUnderLine,
+					  DWRITE_TEXT_ALIGNMENT align,
 					  DWRITE_FONT_STRETCH stretch,
 					  float width,
 					  float height,
@@ -108,14 +111,14 @@ void getCharacterSize(Platform::String^ str,
 			weight,
 			style,
 			stretch,
-			fontSize + 5,
+			fontSize,
 			L"en-US",
 			&m_textFormat
 			);
     }
 	if (SUCCEEDED(hr))
-	{
-		m_textFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	{			
+		m_textFormat->SetTextAlignment(align);
 	}
 	if (SUCCEEDED(hr))
     {
@@ -144,8 +147,8 @@ void getCharacterSize(Platform::String^ str,
 	if(SUCCEEDED(hr))
 	{
 		m_textLayout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM,
-			(fontSize + 5) / 0.8,
-			fontSize + 5);
+			(fontSize) / 0.8,
+			fontSize);
 			
 	}
 
@@ -204,14 +207,22 @@ void TextLayoutItem::showSelectBorder(bool isShow)
 float TextLayoutItem::getMatchingsize(float width,float height)
 {
 	double textSize[2]={0,0};
+	DWRITE_TEXT_ALIGNMENT align;
+	if(m_textAttribute->textAlignment == TextAlignment::Center)
+		align = DWRITE_TEXT_ALIGNMENT_CENTER;
+	else if(m_textAttribute->textAlignment == TextAlignment::Left)
+		align = DWRITE_TEXT_ALIGNMENT_LEADING;
+	else if(m_textAttribute->textAlignment == TextAlignment::Right)
+		align = DWRITE_TEXT_ALIGNMENT_TRAILING;
 	for (int i=72;i>0;i--){
 		getCharacterSize(m_textAttribute->textContent,
 					 m_textAttribute->textFamily,
 					 i,
 					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_BOLD)?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL,
-					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_OBLIQUE)?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,
+					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_ITALIC)?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,
 					 (int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_UNDERLINE)?true:false,
-					 DWRITE_FONT_STRETCH_NORMAL,
+					 align,
+					 DWRITE_FONT_STRETCH_NORMAL,					
 					 width,height,
 					 textSize);
 		if(textSize[0]<width && textSize[1]<height){
@@ -225,12 +236,20 @@ float TextLayoutItem::getMatchingsize(float width,float height)
 void TextLayoutItem::notifyChanged()
 {
 	double textSize[2]={0,0};
+	DWRITE_TEXT_ALIGNMENT align;
+	if(m_textAttribute->textAlignment == TextAlignment::Center)
+		align = DWRITE_TEXT_ALIGNMENT_CENTER;
+	else if(m_textAttribute->textAlignment == TextAlignment::Left)
+		align = DWRITE_TEXT_ALIGNMENT_LEADING;
+	else if(m_textAttribute->textAlignment == TextAlignment::Right)
+		align = DWRITE_TEXT_ALIGNMENT_TRAILING;
 	getCharacterSize(m_textAttribute->textContent,
 		m_textAttribute->textFamily,
 		m_textAttribute->size,
 		(int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_BOLD)?DWRITE_FONT_WEIGHT_BOLD:DWRITE_FONT_WEIGHT_NORMAL,
-		(int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_OBLIQUE)?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,
+		(int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_ITALIC)?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,
 		(int)(m_textAttribute->style&TextDemo::FontStyle::STYLE_UNDERLINE)?true:false,
+		align,
 		DWRITE_FONT_STRETCH_NORMAL,
 		5000,5000,
 		textSize);
@@ -238,13 +257,13 @@ void TextLayoutItem::notifyChanged()
 	double preLeft = parent->GetLeft(this);
 	double preTop = parent->GetTop(this);
 	
-	selectGrid->Width = textSize[0] + 10;
-	selectGrid->Height = textSize[1] + 10;
+	selectGrid->Width = textSize[0] + selectMargin;
+	selectGrid->Height = textSize[1] + selectMargin;
 
-	double preLayoutWidth = m_textAttribute->width;
-	double preLayoutHeight = m_textAttribute->height;
-	m_textAttribute->width=selectGrid->Width;
-	m_textAttribute->height=selectGrid->Height;
+	double preSelectWidth = m_textAttribute->width + selectMargin;
+	double preSelectHeight = m_textAttribute->height + selectMargin;
+	m_textAttribute->width=textSize[0];
+	m_textAttribute->height=textSize[1];
 
 
 	
@@ -256,16 +275,18 @@ void TextLayoutItem::notifyChanged()
 	}
 	else
 	{
-		double maxTxtScaleX = parent->ActualWidth / (m_textAttribute->width + img_delete->Width);
-		double maxTxtScaleY = parent->ActualHeight / (m_textAttribute->height + img_delete->Height);
-		double maxTxtScale = maxTxtScaleX < maxTxtScaleY ? maxTxtScaleX : maxTxtScaleY;		
+		double newSelectWidth = m_textAttribute->width + selectMargin;
+		double newSelectHeight = m_textAttribute->height + selectMargin;
 
+		double maxTxtScaleX = parent->ActualWidth / (newSelectWidth + img_delete->Width);
+		double maxTxtScaleY = parent->ActualHeight / (newSelectHeight + img_delete->Height);
+		double maxTxtScale = maxTxtScaleX < maxTxtScaleY ? maxTxtScaleX : maxTxtScaleY;	
 
 		double preScale = m_textAttribute->scale;
 		if(m_textAttribute->scale > maxTxtScale)
 			m_textAttribute->scale = maxTxtScale;		
-		selectGrid->Width = m_textAttribute->width * m_textAttribute->scale;
-		selectGrid->Height = m_textAttribute->height * m_textAttribute->scale;		
+		selectGrid->Width = newSelectWidth * m_textAttribute->scale;
+		selectGrid->Height = newSelectHeight * m_textAttribute->scale;		
 	
 		
 		//重新调整旋转中心点和位移，保证选择框最终左上点保持不变
@@ -288,7 +309,7 @@ void TextLayoutItem::notifyChanged()
 		double newCenterX = parent->GetLeft(this) + curRotateTrans->CenterX;
 		double newCenterY = parent->GetTop(this) + curRotateTrans->CenterY;
 
-		m_textAttribute->left = newCenterX - m_textAttribute->width / 2.0;
+		m_textAttribute->left = newCenterX - m_textAttribute->width  / 2.0;
 		m_textAttribute->top = newCenterY - m_textAttribute->height / 2.0;
 
 	}
@@ -303,8 +324,8 @@ void TextLayoutItem::scaleSelf(double scaleValue)
 {
 	double orgWidth = selectGrid->Width;
 	double orgHeight = selectGrid->Height;
-	selectGrid->Width = m_textAttribute->width * scaleValue;
-	selectGrid->Height = m_textAttribute->height * scaleValue;
+	selectGrid->Width = (m_textAttribute->width + selectMargin) * scaleValue;
+	selectGrid->Height = (m_textAttribute->height + selectMargin) * scaleValue;
 	double disX = (orgWidth - selectGrid->Width) / 2.0;
 	double disY = (orgHeight - selectGrid->Height) / 2.0;
 
@@ -337,8 +358,19 @@ void TextLayoutItem::moveSelf(double disX,double disY)
 		m_isChanged = true;
 	parent->SetLeft(this,parent->GetLeft(this)+disX);
 	parent->SetTop(this,parent->GetTop(this)+disY);
-	m_textAttribute->left += disX;
-	m_textAttribute->top += disY;
+
+	if(m_isInit)
+	{
+		m_textAttribute->left = newX + selectMargin / 2;
+		m_textAttribute->top = newY + selectMargin / 2;
+	}
+	else
+	{
+		m_textAttribute->left += disX;
+		m_textAttribute->top += disY;
+	}
+
+
 }
 
 void TextDemo::TextLayoutItem::UserControl_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
@@ -420,14 +452,16 @@ void TextDemo::TextLayoutItem::SelectGridMoved(Platform::Object^ sender, Windows
 
 		double newScale=oldScale*scaleValue;
 
+		double orgSelectWidth = m_textAttribute->width + selectMargin;
+		double orgSelectHeight = m_textAttribute->height + selectMargin;
 		
-		double maxTxtScaleX = canvas->ActualWidth / (m_textAttribute->width + img_delete->Width);
-		double maxTxtScaleY = canvas->ActualHeight / (m_textAttribute->height + img_delete->Height);
+		double maxTxtScaleX = canvas->ActualWidth / (orgSelectWidth + img_delete->Width);
+		double maxTxtScaleY = canvas->ActualHeight / (orgSelectHeight + img_delete->Height);
 		double maxTxtScale = maxTxtScaleX < maxTxtScaleY ? maxTxtScaleX : maxTxtScaleY;
 		if(newScale > maxTxtScale)
 			newScale = maxTxtScale;
 
-		double newFontSize=getMatchingsize(m_textAttribute->width*newScale,m_textAttribute->height*newScale);
+		double newFontSize=getMatchingsize(orgSelectWidth*newScale,orgSelectHeight*newScale);
 
 		if(newFontSize>8.0 ){
 			if(m_textAttribute->scale != newScale)

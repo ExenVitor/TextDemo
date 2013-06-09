@@ -73,5 +73,14 @@
     <Image Include="images\text\rotate.png">
       <Filter>images\text</Filter>
     </Image>
+    <Image Include="images\text\bold.png">
+      <Filter>images\text</Filter>
+    </Image>
+    <Image Include="images\text\italic.png">
+      <Filter>images\text</Filter>
+    </Image>
+    <Image Include="images\text\underline.png">
+      <Filter>images\text</Filter>
+    </Image>
   </ItemGroup>
 </Project>
