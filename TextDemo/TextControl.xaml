@@ -255,6 +255,8 @@
             <Slider x:Name="transparencySlider" Width="184" Minimum="0" Maximum="100" Value="0" ValueChanged="OnSliderValueChanged"/>
             <TextBlock Text="CharacterSpacing" Width="184" FontSize="20" Margin="0,10,0,0"/>
             <Slider x:Name="charaSpacingSlider" Width="184" Minimum="0" Maximum="20" Value="0" SmallChange="0.5" StepFrequency="0.5" ValueChanged="OnSliderValueChanged"/>
+            <TextBlock Text="Shadow" Width="184" FontSize="20" Margin="0,10,0,0"/>
+            <Slider x:Name="shadowSlider" Width="184" Minimum="0" Maximum="3" Value="0" SmallChange="0.1" StepFrequency="0.1" ValueChanged="OnSliderValueChanged"/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

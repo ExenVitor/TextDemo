@@ -97,12 +97,18 @@
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453</DisableSpecificWarnings>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;dxguid.lib;d2d1.lib;d3d11.lib;windowscodecs.lib;dwrite.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453</DisableSpecificWarnings>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;dxguid.lib;d2d1.lib;d3d11.lib;windowscodecs.lib;dwrite.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -110,7 +116,7 @@
       <DisableSpecificWarnings>4453</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;d2d1.lib;d3d11.lib;windowscodecs.lib;dwrite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;dxguid.lib;d2d1.lib;d3d11.lib;windowscodecs.lib;dwrite.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,20 +124,30 @@
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453</DisableSpecificWarnings>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;dxguid.lib;d2d1.lib;d3d11.lib;windowscodecs.lib;dwrite.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453</DisableSpecificWarnings>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;dxguid.lib;d2d1.lib;d3d11.lib;windowscodecs.lib;dwrite.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453</DisableSpecificWarnings>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;dxguid.lib;d2d1.lib;d3d11.lib;windowscodecs.lib;dwrite.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CustomTextRenderer.h" />
     <ClInclude Include="DirectXHelper.h" />
     <ClInclude Include="GraphicLayoutItem.xaml.h">
       <DependentUpon>GraphicLayoutItem.xaml</DependentUpon>
@@ -201,6 +217,7 @@
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="CustomTextRenderer.cpp" />
     <ClCompile Include="GraphicLayoutItem.xaml.cpp">
       <DependentUpon>GraphicLayoutItem.xaml</DependentUpon>
     </ClCompile>

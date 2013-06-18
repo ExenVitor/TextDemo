@@ -99,7 +99,7 @@ void TextDemo::getCharacterSize(Platform::String^ str,
 						  }
 						  if (SUCCEEDED(hr))
 						  {			
-							  m_textFormat->SetTextAlignment(align);
+							  hr=m_textFormat->SetTextAlignment(align);
 						  }
 						  if (SUCCEEDED(hr))
 						  {
@@ -121,7 +121,7 @@ void TextDemo::getCharacterSize(Platform::String^ str,
 
 						  if (SUCCEEDED(hr))
 						  {
-							  m_textLayout1->SetUnderline(hasUnderLine,
+							  hr=m_textLayout1->SetUnderline(hasUnderLine,
 								  textRange);
 						  }
 
@@ -129,7 +129,7 @@ void TextDemo::getCharacterSize(Platform::String^ str,
 						  FLOAT lineSpacing,lineBase;
 						  if(SUCCEEDED(hr))
 						  {
-							  m_textLayout1->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM,
+							  hr=m_textLayout1->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM,
 								  (fontSize) / 0.8,
 								  fontSize);
 
@@ -137,7 +137,7 @@ void TextDemo::getCharacterSize(Platform::String^ str,
 
 						  if(SUCCEEDED(hr))
 						  {
-							  m_textLayout1->SetCharacterSpacing(charaSpacing,charaSpacing,0,textRange);
+							  hr=m_textLayout1->SetCharacterSpacing(charaSpacing,charaSpacing,0,textRange);
 						  }
 
 						  if (SUCCEEDED(hr))

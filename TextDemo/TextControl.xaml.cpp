@@ -128,6 +128,7 @@ TextAttribute^ TextControl::createTextAttribute()
 	attri->alpha = 100 - transparencySlider->Value;
 	attri->scale = 1.0;
 	attri->charaSpacing = charaSpacingSlider->Value;
+	attri->shadowWidth = shadowSlider->Value;
 	
 
 	return attri;
@@ -157,6 +158,7 @@ void TextControl::setCurrentItem(ILayoutItem^ item)
 			setCurrentFontStyle(attri->style);
 			transparencySlider->Value = 100 - attri->alpha;
 			charaSpacingSlider->Value = attri->charaSpacing;
+			shadowSlider->Value = attri->shadowWidth;
 			TB_Input->Text = attri->textContent;
 		}
 
@@ -552,6 +554,11 @@ void TextDemo::TextControl::OnSliderValueChanged(Platform::Object^ sender, Windo
 	else if(charaSpacingSlider == slider)
 	{
 		m_currentTextItem->getTextAttribute()->charaSpacing = slider->Value;
+		m_currentTextItem->notifyChanged();
+	}
+	else if(shadowSlider == slider)
+	{
+		m_currentTextItem->getTextAttribute()->shadowWidth = slider->Value;
 		m_currentTextItem->notifyChanged();
 	}
 }

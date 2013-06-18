@@ -281,56 +281,6 @@ void TextMask::EndDraw()
 
 void TextMask::RenderGraphics(TextAttribute^ attri)
 {
-	//ComPtr<ID2D1Bitmap>             m_Bitmap;
-	//ComPtr<IWICBitmapDecoder> wicBitmapDecoder;
-	//auto path = L"Assets\\" + attri->bgimageName;
-	//DX::ThrowIfFailed(
-	//	m_wicFactory->CreateDecoderFromFilename(
-	//	path->Data(),
-	//	nullptr,
-	//	GENERIC_READ,
-	//	WICDecodeMetadataCacheOnDemand,
-	//	&wicBitmapDecoder
-	//	)
-	//	);
-	//ComPtr<IWICBitmapFrameDecode> wicBitmapFrame;
-	//DX::ThrowIfFailed(
-	//	wicBitmapDecoder->GetFrame(0, &wicBitmapFrame)
-	//	);
-	//ComPtr<IWICFormatConverter> wicFormatConverter;
-	//DX::ThrowIfFailed(
-	//	m_wicFactory->CreateFormatConverter(&wicFormatConverter)
-	//	);
-
-	//DX::ThrowIfFailed(
-	//	wicFormatConverter->Initialize(
-	//	wicBitmapFrame.Get(),
-	//	GUID_WICPixelFormat32bppPBGRA,
-	//	WICBitmapDitherTypeNone,
-	//	nullptr,
-	//	0.0,
-	//	WICBitmapPaletteTypeCustom  // the BGRA format has no palette so this value is ignored
-	//	)
-	//	);
-
-	//double dpiX = 96.0f;
-	//double dpiY = 96.0f;
-	//DX::ThrowIfFailed(
-	//	wicFormatConverter->GetResolution(&dpiX, &dpiY)
-	//	);
-	//DX::ThrowIfFailed(
-	//	m_d2dContext->CreateBitmapFromWicBitmap(
-	//	wicFormatConverter.Get(),
-	//	BitmapProperties(
-	//	PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-	//	static_cast<float>(dpiX),
-	//	static_cast<float>(dpiY)
-	//	),
-	//	&m_Bitmap
-	//	)
-	//	);
-
-
 	float left=attri->left / m_scale;
 	float top=attri->top / m_scale;
 
@@ -379,7 +329,31 @@ void TextMask::RenderText(TextAttribute^ attri)
 	Microsoft::WRL::ComPtr<IDWriteTextLayout> m_textLayout;
 	Microsoft::WRL::ComPtr<IDWriteTextLayout1> m_textLayout1;
 	Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> m_pBrush;
+	Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> m_pBrush1;
+	Microsoft::WRL::ComPtr<CustomTextRenderer> m_textRenderer;
 	DWRITE_TEXT_METRICS m_textMetrics;
+
+	
+	DX::ThrowIfFailed(
+		m_d2dContext->CreateSolidColorBrush(
+		D2D1::ColorF(attri->color.R/255.0,attri->color.G/255.0,attri->color.B/255.0,attri->alpha/100.0),
+		&m_pBrush
+		)
+		);
+	DX::ThrowIfFailed(
+		m_d2dContext->CreateSolidColorBrush(
+		D2D1::ColorF(0.0,0.0,1.0,1.0),
+		&m_pBrush1
+		)
+		);
+
+	 m_textRenderer = new (std::nothrow) CustomTextRenderer(
+        m_d2dFactory.Get(),
+        m_d2dContext.Get(),
+        m_pBrush1.Get(),
+        m_pBrush.Get()
+    );
+
 	DX::ThrowIfFailed(
 		m_dwriteFactory->CreateTextFormat(
 		attri->textFamily->Data(),
@@ -405,12 +379,6 @@ void TextMask::RenderText(TextAttribute^ attri)
 		m_textFormat->SetTextAlignment(align)
 		);
 
-	DX::ThrowIfFailed(
-		m_d2dContext->CreateSolidColorBrush(
-		D2D1::ColorF(attri->color.R/255.0,attri->color.G/255.0,attri->color.B/255.0,attri->alpha/100.0),
-		&m_pBrush
-		)
-		);
 	Platform::String^ text = attri->textContent;
 	float width=attri->width / m_scale;
 	float height=attri->height / m_scale;
@@ -473,14 +441,64 @@ void TextMask::RenderText(TextAttribute^ attri)
 		D2D1::Point2F(
 		centerX,centerY
 		)
-		);	
-
+		);		
 	m_d2dContext->SetTransform(scaleTranslation * rotateTranslation);
-	m_d2dContext->DrawTextLayout(
-		Point2F(left, top),
-		m_textLayout1.Get(),
-		m_pBrush.Get(),
-		D2D1_DRAW_TEXT_OPTIONS_NO_SNAP
+	if(attri->shadowWidth > 0)
+	{
+		Microsoft::WRL::ComPtr<ID2D1Bitmap1> orgRenderTarget;
+		m_d2dContext->GetTarget((ID2D1Image**)orgRenderTarget.GetAddressOf());
+
+		Microsoft::WRL::ComPtr<ID2D1Bitmap1> shadowRenderTarget;
+		D2D1_BITMAP_PROPERTIES1 renderTargetProperties = D2D1::BitmapProperties1(
+			D2D1_BITMAP_OPTIONS_TARGET,
+			D2D1::PixelFormat(
+			DXGI_FORMAT_B8G8R8A8_UNORM,
+			D2D1_ALPHA_MODE_PREMULTIPLIED
+			)
+			);
+
+
+		D2D1_SIZE_F bitmapSize = D2D1::SizeF(m_textMetrics.layoutWidth,m_textMetrics.layoutHeight);
+
+		DX::ThrowIfFailed(
+			m_d2dContext->CreateBitmap(
+			D2D1::SizeU(static_cast<UINT32>(bitmapSize.width) ,static_cast<UINT32>(bitmapSize.height)),
+			nullptr,
+			0,
+			&renderTargetProperties,
+			&shadowRenderTarget
+			)
+			);
+
+		m_d2dContext->SetTarget(shadowRenderTarget.Get());
+		m_d2dContext->SetTransform(D2D1::Matrix3x2F::Identity());
+		m_textLayout1->Draw(
+			m_d2dContext.Get(),
+			m_textRenderer.Get(),
+			0,
+			0
+			);
+
+		m_d2dContext->SetTarget(orgRenderTarget.Get());
+
+		ComPtr<ID2D1Effect> shadowEffect;
+		m_d2dContext->CreateEffect(CLSID_D2D1Shadow, &shadowEffect);	
+		shadowEffect->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION,1.0f);
+		shadowEffect->SetValue(D2D1_SHADOW_PROP_OPTIMIZATION,D2D1_DIRECTIONALBLUR_OPTIMIZATION_SPEED);
+		shadowEffect->SetInput(0,shadowRenderTarget.Get());
+		m_d2dContext->SetTransform(scaleTranslation * rotateTranslation);
+		
+		m_d2dContext->DrawImage(
+			shadowEffect.Get(),
+			D2D1::Point2F(left + attri->shadowWidth,top + attri->shadowWidth)
+			);
+	}
+
+	m_textLayout1->Draw(
+		m_d2dContext.Get(),
+		m_textRenderer.Get(),
+		left,
+		top
 		);
 }
 

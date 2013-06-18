@@ -39,6 +39,7 @@ namespace TextDemo
 			tmp->scale = scale;
 			tmp->alpha = alpha;	
 			tmp->charaSpacing = charaSpacing;
+			tmp->shadowWidth = shadowWidth;
 
 			tmp->width = width;
 			tmp->height = height;
@@ -64,6 +65,7 @@ namespace TextDemo
 		property double												scale;
 		property int												alpha;
 		property double												charaSpacing;
+		property double												shadowWidth;
 		
 		property double												width;
 		property double												height;

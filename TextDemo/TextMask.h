@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "ILayoutItem.h"
+#include "CustomTextRenderer.h"
 
 namespace TextDemo{
 
