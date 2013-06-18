@@ -6,7 +6,7 @@
 #pragma once
 
 #include "TextCanvasControl.g.h"
-#include "TextLayoutItem.xaml.h"
+#include "ILayoutItem.h"
 
 using namespace Windows::UI::Xaml::Media::Imaging;
 
@@ -14,7 +14,7 @@ namespace TextDemo
 {
 	ref class TextMask;
 	ref class MainPage;
-	ref class TextLayoutItem;
+	
 	ref class TextAttribute;
 	[Windows::Foundation::Metadata::WebHostHidden]
 	public ref class TextCanvasControl sealed
@@ -22,8 +22,8 @@ namespace TextDemo
 	public:
 		TextCanvasControl(MainPage^ page);
 		void initTextCanvas(double width,double height,double scale,WriteableBitmap^ previewImg);
-		void addTextLayoutItem(TextLayoutItem^ item);	
-		void removeTextLayoutItem(TextLayoutItem^ item);
+		void addTextLayoutItem(ILayoutItem^ item);	
+		void removeTextLayoutItem(ILayoutItem^ item);
 		
 		Platform::Array<TextAttribute^>^ getItemAttributes();
 		Platform::Array<BYTE>^ getResultData();

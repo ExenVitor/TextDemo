@@ -6,12 +6,11 @@
 #pragma once
 
 #include "TextControl.g.h"
-#include "TextLayoutItem.xaml.h"
+#include "ILayoutItem.h"
 
 namespace TextDemo
 {
-	ref class MainPage;
-	ref class TextLayoutItem;
+	ref class MainPage;	
 	ref class TextAttribute;
 
 	[Windows::UI::Xaml::Data::Bindable]
@@ -32,8 +31,8 @@ namespace TextDemo
 
 		TextAttribute^ createTextAttribute();
 
-		void setCurrentItem(TextLayoutItem^ item);
-		void deleteTextItem(TextLayoutItem^ item);
+		void setCurrentItem(ILayoutItem^ item);
+		void deleteTextItem(ILayoutItem^ item);
 
 		property bool EventLock;
 
@@ -48,11 +47,12 @@ namespace TextDemo
 		void setCurrentFontStyle(TextDemo::FontStyle style);
 
 		MainPage^			m_pAdjustPage;
-		TextLayoutItem^		m_currentTextItem;
+		ILayoutItem^		m_currentTextItem;
 		bool				m_isChinese;
 		
 		void OnInputTextChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::TextChangedEventArgs^ e);
 		void OnAlignChecked(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void OnTextStyle_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void OnSliderValueChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^ e);
 	};
 }

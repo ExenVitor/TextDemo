@@ -7,6 +7,7 @@
 #include "TextControl.xaml.h"
 #include "TextCanvasControl.xaml.h"
 #include "TextLayoutItem.xaml.h"
+#include "GraphicLayoutItem.xaml.h"
 #include "MainPage.xaml.h"
 #include "DirectXHelper.h"
 
@@ -119,16 +120,20 @@ TextAttribute^ TextControl::createTextAttribute()
 	attri->colorIndex = cob_Color->SelectedIndex;
 
 	attri->textAlignment = TextAlignment::Left;
+	attri->itemType = TextItemType::Type_Text;
+	/*attri->itemType = TextItemType::Type_Graphics;
+	attri->bgimageName = L"GB1.png";*/
 	attri->angle = 0;
 
-	attri->alpha = 100;
+	attri->alpha = 100 - transparencySlider->Value;
 	attri->scale = 1.0;
+	attri->charaSpacing = charaSpacingSlider->Value;
 	
 
 	return attri;
 }
 
-void TextControl::setCurrentItem(TextLayoutItem^ item)
+void TextControl::setCurrentItem(ILayoutItem^ item)
 {
 	if(m_currentTextItem != nullptr)
 		m_currentTextItem->showSelectBorder(false);
@@ -136,19 +141,25 @@ void TextControl::setCurrentItem(TextLayoutItem^ item)
 	if(item != nullptr)
 	{
 		item->showSelectBorder(true);
-		auto attri = item->getTextAttribute();		
-		auto fontFamily = ref new Windows::UI::Xaml::Media::FontFamily(attri->textFamily);
-		cob_FontFamily->SelectedIndex = attri->textFamilyIndex;
-		cob_FontFamily->FontFamily = fontFamily;
-		cob_Color->SelectedIndex = attri->colorIndex;
-		if(attri->textAlignment == TextAlignment::Left)
-			align_Left->IsChecked = true;
-		else if(attri->textAlignment == TextAlignment::Center)
-			align_Center->IsChecked = true;
-		else if(attri->textAlignment == TextAlignment::Right)
-			align_Right->IsChecked = true;
-		setCurrentFontStyle(attri->style);
-		TB_Input->Text = attri->textContent;
+		auto attri = item->getTextAttribute();
+		if(attri->itemType == TextItemType::Type_Text)
+		{
+			auto fontFamily = ref new Windows::UI::Xaml::Media::FontFamily(attri->textFamily);
+			cob_FontFamily->SelectedIndex = attri->textFamilyIndex;
+			cob_FontFamily->FontFamily = fontFamily;
+			cob_Color->SelectedIndex = attri->colorIndex;
+			if(attri->textAlignment == TextAlignment::Left)
+				align_Left->IsChecked = true;
+			else if(attri->textAlignment == TextAlignment::Center)
+				align_Center->IsChecked = true;
+			else if(attri->textAlignment == TextAlignment::Right)
+				align_Right->IsChecked = true;
+			setCurrentFontStyle(attri->style);
+			transparencySlider->Value = 100 - attri->alpha;
+			charaSpacingSlider->Value = attri->charaSpacing;
+			TB_Input->Text = attri->textContent;
+		}
+
 	}
 	else
 	{
@@ -162,7 +173,7 @@ void TextControl::setCurrentItem(TextLayoutItem^ item)
 
 }
 
-void TextControl::deleteTextItem(TextLayoutItem^ item)
+void TextControl::deleteTextItem(ILayoutItem^ item)
 {
 	m_pAdjustPage->getTextCanvasControl()->removeTextLayoutItem(item);
 	setCurrentItem(nullptr);
@@ -526,4 +537,21 @@ void TextDemo::TextControl::OnTextStyle_Click(Platform::Object^ sender, Windows:
 	/*m_pAdjustPage->setNeedSave(true);
 	if(isChange)
 		saveTextData();*/
+}
+
+void TextDemo::TextControl::OnSliderValueChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^ e)
+{
+	if(m_currentTextItem == nullptr || EventLock == true)
+		return;
+	Slider ^slider = safe_cast<Slider^>(sender);
+	if(transparencySlider == slider)
+	{
+		m_currentTextItem->getTextAttribute()->alpha = 100- slider->Value;
+		m_currentTextItem->notifyChanged();
+	}
+	else if(charaSpacingSlider == slider)
+	{
+		m_currentTextItem->getTextAttribute()->charaSpacing = slider->Value;
+		m_currentTextItem->notifyChanged();
+	}
 }

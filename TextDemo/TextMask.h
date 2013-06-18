@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "TextLayoutItem.xaml.h"
+#include "ILayoutItem.h"
 
 namespace TextDemo{
 
@@ -21,6 +21,7 @@ namespace TextDemo{
 		Platform::Array<BYTE>^ getSaveData(double width,double height,double scale);
 
 		property Platform::Array<TextAttribute ^> ^ 	pTextAttributes;
+		
 		property int BitmapWidth
 		{
 			int get() {return _bitmapWidth;}
@@ -35,7 +36,9 @@ namespace TextDemo{
 		void Clear(Windows::UI::Color color);
 
 		void RenderText(TextAttribute^ attri);
-
+		void RenderGraphics(TextAttribute^ attri);
+		void initBgimageNameArray();
+		void initBgimage(int index);
 		Microsoft::WRL::ComPtr<ISurfaceImageSourceNative>   m_sisNative;
 
 		// Direct3D device
@@ -47,10 +50,13 @@ namespace TextDemo{
 		Microsoft::WRL::ComPtr<ID2D1Factory1>				m_d2dFactory;
 
 		Microsoft::WRL::ComPtr<IDWriteFactory1>				m_dwriteFactory;
+		Microsoft::WRL::ComPtr<IWICImagingFactory2>			m_wicFactory;
 
 		Microsoft::WRL::ComPtr<ID2D1Bitmap1>				m_pTargetBitmap;
 		Microsoft::WRL::ComPtr<ID2D1Bitmap1>				m_pRenderBitmap;
 
+		std::vector<Microsoft::WRL::ComPtr<ID2D1Bitmap>>    m_bgimageList;
+		Platform::Collections::Vector<Platform::String^>^	m_bgimageNames;
 		int                                                 m_width;
 		int                                                 m_height;
 		int													_bitmapWidth;

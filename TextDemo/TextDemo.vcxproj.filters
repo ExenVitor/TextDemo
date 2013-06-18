@@ -40,6 +40,7 @@
     <ClCompile Include="TextCanvasControl.xaml.cpp" />
     <ClCompile Include="TextControl.xaml.cpp" />
     <ClCompile Include="TextLayoutItem.xaml.cpp" />
+    <ClCompile Include="ILayoutItem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -50,6 +51,7 @@
     <ClInclude Include="TextCanvasControl.xaml.h" />
     <ClInclude Include="TextControl.xaml.h" />
     <ClInclude Include="TextLayoutItem.xaml.h" />
+    <ClInclude Include="ILayoutItem.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -62,6 +64,7 @@
     <Page Include="TextCanvasControl.xaml" />
     <Page Include="TextLayoutItem.xaml" />
     <Page Include="TextControl.xaml" />
+    <Page Include="GraphicLayoutItem.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\sample.jpg">
@@ -81,6 +84,15 @@
     </Image>
     <Image Include="images\text\underline.png">
       <Filter>images\text</Filter>
+    </Image>
+    <Image Include="Assets\GB1.png">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\GB2.png">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\GB3.png">
+      <Filter>资产</Filter>
     </Image>
   </ItemGroup>
 </Project>

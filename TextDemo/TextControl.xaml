@@ -217,8 +217,8 @@
         </ItemsPanelTemplate>
     </UserControl.Resources>
 
-    <Grid>
-        <StackPanel>
+    <ScrollViewer HorizontalScrollMode="Disabled" VerticalScrollMode="Auto">
+        <StackPanel>            
             <Button x:Name="AddText" Content="AddText" FontSize="18" Width="120" Height="50" HorizontalAlignment="Center" Click="onAddClick"/>
             <Button x:Name="Save" Content="Save" FontSize="18" Width="120" Height="50" HorizontalAlignment="Center" Click="onSaveClick"/>
             <TextBox x:Name="TB_Input" FontSize="18" Width="200" Height="150"   HorizontalAlignment="Center" AcceptsReturn="True"  
@@ -249,9 +249,12 @@
                     <CheckBox.Foreground>
                         <ImageBrush ImageSource="images/Text/underline.png" Stretch="None"/>
                     </CheckBox.Foreground>
-                </CheckBox>
-              
+                </CheckBox>              
             </StackPanel>
+            <TextBlock Text="Transparency" Width="184" FontSize="20" Margin="0,10,0,0"/>
+            <Slider x:Name="transparencySlider" Width="184" Minimum="0" Maximum="100" Value="0" ValueChanged="OnSliderValueChanged"/>
+            <TextBlock Text="CharacterSpacing" Width="184" FontSize="20" Margin="0,10,0,0"/>
+            <Slider x:Name="charaSpacingSlider" Width="184" Minimum="0" Maximum="20" Value="0" SmallChange="0.5" StepFrequency="0.5" ValueChanged="OnSliderValueChanged"/>
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

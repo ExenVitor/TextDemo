@@ -7,6 +7,7 @@
 #include "TextControl.xaml.h"
 #include "TextCanvasControl.xaml.h"
 #include "TextLayoutItem.xaml.h"
+#include "ILayoutItem.h"
 #include "TextMask.h"
 #include "MainPage.xaml.h"
 
@@ -27,7 +28,7 @@ using namespace concurrency;
 
 // “用户控件”项模板在 http://go.microsoft.com/fwlink/?LinkId=234236 上提供
 
-extern void bringToFront(Windows::UI::Xaml::Controls::Canvas^ parent,Windows::UI::Xaml::UIElement^ child);
+
 
 TextCanvasControl::TextCanvasControl(MainPage^ page)
 {
@@ -82,19 +83,21 @@ void TextCanvasControl::updateTextMask()
 	m_textMask->EndDraw();
 }
 
-void TextCanvasControl::addTextLayoutItem(TextLayoutItem^ item)
+void TextCanvasControl::addTextLayoutItem(ILayoutItem^ item)
 {
-	textCanvas->Children->Append(item);
+	auto UIitem = safe_cast<UIElement^>(item);
+	textCanvas->Children->Append(UIitem);
 	textCanvas->UpdateLayout();
-	item->UpdateLayout();
-	bringToFront(textCanvas,item);
+	UIitem->UpdateLayout();
+	bringToFront(textCanvas,UIitem);
 	
 }
 
-void TextCanvasControl::removeTextLayoutItem(TextLayoutItem^ item)
+void TextCanvasControl::removeTextLayoutItem(ILayoutItem^ item)
 {
+	auto UIitem = safe_cast<UIElement^>(item);
 	for(int num=textCanvas->Children->Size-1;num>=0;num--){
-		if(item==textCanvas->Children->GetAt(num)){
+		if(UIitem==textCanvas->Children->GetAt(num)){
 			textCanvas->Children->RemoveAt(num);
 			updateTextMask();
 			break;
@@ -110,7 +113,7 @@ Platform::Array<TextAttribute^>^ TextCanvasControl::getItemAttributes()
 {
 	auto result=ref new Platform::Array<TextAttribute^>(textCanvas->Children->Size);
 	for(int i=0;i<textCanvas->Children->Size;i++){
-		result[i]=((TextLayoutItem^)textCanvas->Children->GetAt(i))->getTextAttribute();
+		result[i]=((ILayoutItem^)textCanvas->Children->GetAt(i))->getTextAttribute();
 		result[i]->Zindex=textCanvas->GetZIndex(textCanvas->Children->GetAt(i));
 	}
 	//按zindex排序
